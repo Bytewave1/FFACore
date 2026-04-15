@@ -3,6 +3,7 @@ version: ${project.version}
 main: dev.warpsmp.ffacore.FFACore
 api-version: '1.21'
 folia-supported: true
+# Works on both Paper and Folia via Scheduler utility
 description: FFA Core Plugin for WarpSMP
 authors: [Bytewave1]
 softdepend: [PlaceholderAPI]

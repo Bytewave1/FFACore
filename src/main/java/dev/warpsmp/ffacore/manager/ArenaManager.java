@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.manager;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import org.bukkit.Bukkit;
@@ -133,7 +134,7 @@ public class ArenaManager {
 
         // Write to file async (plain text, not YAML — much faster)
         int count = blocks.size();
-        Bukkit.getAsyncScheduler().runNow(plugin, task -> {
+        Scheduler.runAsync(plugin, () -> {
             File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
             try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(snapFile))) {
                 for (Map.Entry<String, String> entry : blocks.entrySet()) {
@@ -242,7 +243,7 @@ public class ArenaManager {
             Location loc = new Location(arena.world, x, y, z);
 
             // Use region scheduler — reads and writes block on the correct region thread
-            Bukkit.getRegionScheduler().run(plugin, loc, task -> {
+            Scheduler.runAtLocation(plugin, loc, () -> {
                 Block block = loc.getBlock();
                 if (!block.getBlockData().getAsString().equals(originalData)) {
                     try {

@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.listener;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import org.bukkit.Location;
@@ -21,7 +22,7 @@ public class JoinListener implements Listener {
         Player player = event.getPlayer();
 
         // Always teleport to spawn + give kit, with slight delay for chunks to load
-        player.getScheduler().runDelayed(plugin, task -> {
+        Scheduler.runPlayerDelayed(plugin, player, () -> {
             if (!player.isOnline()) return;
 
             // Show active bossbars
@@ -37,6 +38,6 @@ public class JoinListener implements Listener {
                     }
                 });
             }
-        }, null, 10L);
+        }, 10L);
     }
 }

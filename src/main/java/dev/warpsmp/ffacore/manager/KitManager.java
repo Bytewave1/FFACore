@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.manager;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import org.bukkit.Material;
@@ -139,21 +140,21 @@ public class KitManager {
     public void giveKit(Player player) {
         applyKit(player);
         // Verify kit was applied after 5 ticks, re-apply if empty (Folia timing issues)
-        player.getScheduler().runDelayed(plugin, t -> {
+        Scheduler.runPlayerDelayed(plugin, player, () -> {
             if (!player.isOnline() || player.isDead()) return;
             if (player.getInventory().isEmpty()) {
                 plugin.getLogger().info("Kit re-apply for " + player.getName() + " (inventory was empty)");
                 applyKit(player);
             }
-        }, null, 5L);
+        }, 5L);
         // Final safety net at 15 ticks
-        player.getScheduler().runDelayed(plugin, t -> {
+        Scheduler.runPlayerDelayed(plugin, player, () -> {
             if (!player.isOnline() || player.isDead()) return;
             if (player.getInventory().isEmpty()) {
                 plugin.getLogger().info("Kit final re-apply for " + player.getName());
                 applyKit(player);
             }
-        }, null, 15L);
+        }, 15L);
     }
 
     private void applyKit(Player player) {

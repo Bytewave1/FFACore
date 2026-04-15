@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.manager;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import net.kyori.adventure.bossbar.BossBar;
@@ -62,7 +63,7 @@ public class EventManager {
 
                     long remaining = doubleCoinsEndTime - System.currentTimeMillis();
                     if (remaining <= 0) {
-                        Bukkit.getGlobalRegionScheduler().run(plugin, t -> stopDoubleCoins());
+                        Scheduler.runGlobal(plugin, () -> stopDoubleCoins());
                         continue;
                     }
 

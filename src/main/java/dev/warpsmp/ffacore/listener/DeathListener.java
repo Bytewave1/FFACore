@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.listener;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import dev.warpsmp.ffacore.manager.MessageManager;
@@ -76,16 +77,16 @@ public class DeathListener implements Listener {
         PENDING_RESPAWN.add(victim.getUniqueId());
 
         // Force instant respawn via Folia scheduler
-        victim.getScheduler().runDelayed(plugin, task -> {
+        Scheduler.runPlayerDelayed(plugin, victim, () -> {
             if (!victim.isOnline()) return;
             if (victim.isDead()) {
                 victim.spigot().respawn();
             }
-        }, null, 1L);
+        }, 1L);
 
         // Teleport + kit after respawn (multiple attempts for reliability)
         for (int delay : new int[]{3, 8, 15, 25}) {
-            victim.getScheduler().runDelayed(plugin, task -> {
+            Scheduler.runPlayerDelayed(plugin, victim, () -> {
                 if (!victim.isOnline() || victim.isDead()) return;
                 if (!PENDING_RESPAWN.contains(victim.getUniqueId())) return;
 
@@ -93,7 +94,7 @@ public class DeathListener implements Listener {
                     victim.teleportAsync(plugin.getSpawnManager().getSpawn()).thenAccept(success -> {
                         if (success && PENDING_RESPAWN.remove(victim.getUniqueId())) {
                             // Give kit with delay after teleport
-                            victim.getScheduler().runDelayed(plugin, t -> {
+                            Scheduler.runPlayerDelayed(plugin, victim, () -> {
                                 if (!victim.isOnline()) return;
                                 if (plugin.getKitManager().hasKit()) {
                                     plugin.getKitManager().giveKit(victim);
@@ -103,7 +104,7 @@ public class DeathListener implements Listener {
                                     plugin.getMessageManager().get("respawn-subtitle"),
                                     Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
                                 ));
-                            }, null, 3L);
+                            }, 3L);
                         }
                     });
                 } else {
@@ -113,7 +114,7 @@ public class DeathListener implements Listener {
                         }
                     }
                 }
-            }, null, (long) delay);
+            }, (long) delay);
         }
     }
 }

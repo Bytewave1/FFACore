@@ -52,6 +52,7 @@ public class BlockProtectListener implements Listener {
         // Always protect sandstone blocks everywhere — overrides WorldGuard
         if (ALWAYS_PROTECTED.contains(event.getBlock().getType())) {
             event.setCancelled(true);
+            plugin.getLogger().info("BLOCKED sandstone break by " + player.getName() + " at " + event.getBlock().getLocation().getBlockY());
             return;
         }
 

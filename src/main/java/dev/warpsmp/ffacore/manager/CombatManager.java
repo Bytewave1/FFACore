@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.manager;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import net.kyori.adventure.text.Component;
@@ -50,10 +51,10 @@ public class CombatManager {
                             combatTimers.remove(entry.getKey());
                             Player player = plugin.getServer().getPlayer(entry.getKey());
                             if (player != null && player.isOnline()) {
-                                player.getScheduler().run(plugin, t -> {
+                                Scheduler.runPlayer(plugin, player, () -> {
                                     player.sendActionBar(mm.deserialize(
                                         plugin.getMessageManager().getRaw("combat-end")));
-                                }, null);
+                                });
                             }
                             continue;
                         }
@@ -63,9 +64,9 @@ public class CombatManager {
                             String msg = plugin.getMessageManager().getRaw("combat-tag")
                                 .replace("{time}", String.format("%.1f", seconds));
                             Component component = mm.deserialize(msg);
-                            player.getScheduler().run(plugin, t -> {
+                            Scheduler.runPlayer(plugin, player, () -> {
                                 player.sendActionBar(component);
-                            }, null);
+                            });
                         }
                     }
                 } catch (Exception ignored) {}

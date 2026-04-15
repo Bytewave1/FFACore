@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.command;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import dev.warpsmp.ffacore.manager.MessageManager;
@@ -55,7 +56,7 @@ public class SpawnCommand implements CommandExecutor {
         // Countdown with action bar
         for (int i = warmup; i >= 1; i--) {
             final int sec = i;
-            player.getScheduler().runDelayed(plugin, t -> {
+            Scheduler.runPlayerDelayed(plugin, player, () -> {
                 if (!warmups.contains(player.getUniqueId())) return;
                 // Check if moved
                 if (hasMoved(startLoc, player.getLocation())) {
@@ -72,11 +73,11 @@ public class SpawnCommand implements CommandExecutor {
                 String msg = plugin.getMessageManager().getRaw("spawn-countdown")
                     .replace("{time}", String.valueOf(sec));
                 player.sendActionBar(mm.deserialize(msg));
-            }, null, Math.max(1L, (long) (warmup - sec) * 20L));
+            }, Math.max(1L, (long) (warmup - sec) * 20L));
         }
 
         // Teleport after warmup
-        player.getScheduler().runDelayed(plugin, t -> {
+        Scheduler.runPlayerDelayed(plugin, player, () -> {
             warmups.remove(player.getUniqueId());
             if (hasMoved(startLoc, player.getLocation())) {
                 player.sendMessage(plugin.getMessageManager().get("spawn-cancelled"));
@@ -93,7 +94,7 @@ public class SpawnCommand implements CommandExecutor {
             player.setFoodLevel(20);
             player.setSaturation(20f);
             player.setFireTicks(0);
-        }, null, (long) warmup * 20L);
+        }, (long) warmup * 20L);
 
         return true;
     }

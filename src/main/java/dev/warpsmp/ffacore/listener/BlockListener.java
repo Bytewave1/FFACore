@@ -1,4 +1,5 @@
 package dev.warpsmp.ffacore.listener;
+import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
 import org.bukkit.Bukkit;
@@ -29,7 +30,7 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onBucket(PlayerBucketEmptyEvent event) {
         Location loc = event.getBlock().getLocation();
-        Bukkit.getRegionScheduler().runDelayed(plugin, loc, task -> {
+        Scheduler.runAtLocationDelayed(plugin, loc, () -> {
             Block current = loc.getBlock();
             if (current.getType() == Material.WATER || current.getType() == Material.LAVA) {
                 plugin.getArenaManager().trackBlock(loc);
