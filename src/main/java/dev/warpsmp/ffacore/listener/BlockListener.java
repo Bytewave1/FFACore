@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 
@@ -32,6 +33,14 @@ public class BlockListener implements Listener {
                 scheduleRemoval(loc);
             }
         }, 2L);
+    }
+
+    @EventHandler
+    public void onBlockForm(BlockFormEvent event) {
+        Material type = event.getNewState().getType();
+        if (type == Material.COBBLESTONE || type == Material.STONE || type == Material.OBSIDIAN) {
+            scheduleRemoval(event.getBlock().getLocation());
+        }
     }
 
     private void scheduleRemoval(Location loc) {
