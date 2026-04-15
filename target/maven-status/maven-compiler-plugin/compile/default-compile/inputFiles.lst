@@ -1,5 +1,6 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/CoinManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/DeathListener.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SpawnCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SaveKitCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/FFACore.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/CombatListener.java

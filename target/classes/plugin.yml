@@ -21,6 +21,8 @@ commands:
   adminsetspawn:
     description: Set the FFA spawn point
     permission: ffacore.admin
+  spawn:
+    description: Teleport to spawn
 
 permissions:
   ffacore.admin:

@@ -44,3 +44,6 @@ combat-end: "<green><bold>ᴄᴏᴍʙᴀᴛ ᴇɴᴅᴇᴅ</bold></green>"
 
 # Spawn
 spawn-set: "{prefix}<green>sᴘᴀᴡɴ sᴇᴛ!</green> <dark_gray>(at your location)</dark_gray>"
+spawn-teleported: "{prefix}<green>ᴛᴇʟᴇᴘᴏʀᴛᴇᴅ ᴛᴏ sᴘᴀᴡɴ</green>"
+spawn-combat: "{prefix}<red>ᴅᴜ ʙɪsᴛ ɪᴍ ᴄᴏᴍʙᴀᴛ!</red> <dark_gray>(wait for timer)</dark_gray>"
+spawn-not-set: "{prefix}<red>No spawn set yet.</red>"

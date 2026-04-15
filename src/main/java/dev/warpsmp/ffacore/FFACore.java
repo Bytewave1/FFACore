@@ -36,6 +36,7 @@ public class FFACore extends JavaPlugin {
         getCommand("coins").setExecutor(new CoinsCommand(this));
         getCommand("setcoins").setExecutor(new SetCoinsCommand(this));
         getCommand("adminsetspawn").setExecutor(new AdminSetSpawnCommand(this));
+        getCommand("spawn").setExecutor(new SpawnCommand(this));
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);
