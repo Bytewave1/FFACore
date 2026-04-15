@@ -120,9 +120,27 @@ public class ArenaResetCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case "reset" -> {
-                plugin.getArenaManager().resetAllArenas();
+                int restored = plugin.getArenaManager().resetAllArenas();
                 player.sendMessage(plugin.getMessageManager().get("prefix")
-                    .append(mm.deserialize("<green>ᴀʟʟ ᴀʀᴇɴᴀs ʀᴇsᴇᴛ!</green>")));
+                    .append(mm.deserialize("<green>ᴀʟʟ ᴀʀᴇɴᴀs ʀᴇsᴇᴛ!</green> <dark_gray>(" + restored + " blocks restored)</dark_gray>")));
+            }
+            case "snapshot" -> {
+                if (args.length < 2) {
+                    player.sendMessage(plugin.getMessageManager().get("prefix")
+                        .append(mm.deserialize("<gray>Usage: /arenareset snapshot <name></gray>")));
+                    return true;
+                }
+                ArenaManager.Arena a = plugin.getArenaManager().getArena(args[1]);
+                if (a == null) {
+                    player.sendMessage(plugin.getMessageManager().get("prefix")
+                        .append(mm.deserialize("<red>Arena not found.</red>")));
+                    return true;
+                }
+                plugin.getArenaManager().createArena(a.name,
+                    new org.bukkit.Location(a.world, a.x1, a.y1, a.z1),
+                    new org.bukkit.Location(a.world, a.x2, a.y2, a.z2));
+                player.sendMessage(plugin.getMessageManager().get("prefix")
+                    .append(mm.deserialize("<green>sɴᴀᴘsʜᴏᴛ ᴜᴘᴅᴀᴛᴇᴅ!</green> <dark_gray>(" + a.name + ")</dark_gray>")));
             }
             default -> sendHelp(player);
         }
@@ -151,7 +169,7 @@ public class ArenaResetCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
             List<String> subs = new ArrayList<>();
-            for (String s : List.of("wand", "pos1", "pos2", "create", "delete", "list", "reset")) {
+            for (String s : List.of("wand", "pos1", "pos2", "create", "delete", "list", "reset", "snapshot")) {
                 if (s.startsWith(args[0].toLowerCase())) subs.add(s);
             }
             return subs;

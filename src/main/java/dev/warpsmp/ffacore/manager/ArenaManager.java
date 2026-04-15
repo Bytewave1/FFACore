@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -18,6 +19,7 @@ public class ArenaManager {
 
     private final FFACore plugin;
     private final File file;
+    private final File snapshotsDir;
     private YamlConfiguration data;
     private final Map<String, Arena> arenas = new LinkedHashMap<>();
     private final Set<LocationKey> placedBlocks = ConcurrentHashMap.newKeySet();
@@ -25,9 +27,11 @@ public class ArenaManager {
     public ArenaManager(FFACore plugin) {
         this.plugin = plugin;
         this.file = new File(plugin.getDataFolder(), "arenas.yml");
+        this.snapshotsDir = new File(plugin.getDataFolder(), "snapshots");
         if (!file.exists()) {
             try { file.createNewFile(); } catch (IOException ignored) {}
         }
+        if (!snapshotsDir.exists()) snapshotsDir.mkdirs();
         this.data = YamlConfiguration.loadConfiguration(file);
         load();
         startResetTask();
@@ -79,11 +83,37 @@ public class ArenaManager {
             Math.max(pos1.getBlockZ(), pos2.getBlockZ()));
         arenas.put(name.toLowerCase(), arena);
         save();
+        // Save snapshot of current blocks
+        saveSnapshot(arena);
+    }
+
+    private void saveSnapshot(Arena arena) {
+        File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
+        YamlConfiguration snap = new YamlConfiguration();
+        int count = 0;
+        for (int x = arena.x1; x <= arena.x2; x++) {
+            for (int y = arena.y1; y <= arena.y2; y++) {
+                for (int z = arena.z1; z <= arena.z2; z++) {
+                    Block block = arena.world.getBlockAt(x, y, z);
+                    String key = x + "," + y + "," + z;
+                    snap.set(key, block.getBlockData().getAsString());
+                    count++;
+                }
+            }
+        }
+        try {
+            snap.save(snapFile);
+            plugin.getLogger().info("Snapshot saved for arena " + arena.name + ": " + count + " blocks");
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save snapshot: " + e.getMessage());
+        }
     }
 
     public boolean deleteArena(String name) {
         if (arenas.remove(name.toLowerCase()) != null) {
             save();
+            File snapFile = new File(snapshotsDir, name.toLowerCase() + ".dat");
+            if (snapFile.exists()) snapFile.delete();
             return true;
         }
         return false;
@@ -110,33 +140,62 @@ public class ArenaManager {
         }
     }
 
-    public void resetAllArenas() {
-        int count = 0;
-        for (LocationKey key : placedBlocks) {
-            Location loc = key.toLocation();
-            if (loc != null && loc.isChunkLoaded()) {
-                Block block = loc.getBlock();
-                if (block.getType() != Material.AIR) {
-                    Bukkit.getRegionScheduler().run(plugin, loc, task -> {
-                        loc.getBlock().setType(Material.AIR);
-                    });
-                    count++;
-                }
-            }
+    /**
+     * Resets all arenas to their original snapshot state.
+     * Compares every block with the snapshot and restores differences.
+     */
+    public int resetAllArenas() {
+        int totalRestored = 0;
+        for (Arena arena : arenas.values()) {
+            totalRestored += resetArena(arena);
         }
         placedBlocks.clear();
-        if (count > 0) {
-            plugin.getLogger().info("Arena reset: removed " + count + " player-placed blocks");
+        if (totalRestored > 0) {
+            plugin.getLogger().info("Arena reset: restored " + totalRestored + " blocks");
         }
+        return totalRestored;
+    }
+
+    private int resetArena(Arena arena) {
+        File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
+        if (!snapFile.exists()) return 0;
+
+        YamlConfiguration snap = YamlConfiguration.loadConfiguration(snapFile);
+        int restored = 0;
+
+        for (String key : snap.getKeys(false)) {
+            String[] parts = key.split(",");
+            if (parts.length != 3) continue;
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+            int z = Integer.parseInt(parts[2]);
+
+            String originalData = snap.getString(key);
+            if (originalData == null) continue;
+
+            Block block = arena.world.getBlockAt(x, y, z);
+            String currentData = block.getBlockData().getAsString();
+
+            if (!currentData.equals(originalData)) {
+                try {
+                    BlockData blockData = Bukkit.createBlockData(originalData);
+                    Location loc = new Location(arena.world, x, y, z);
+                    Bukkit.getRegionScheduler().run(plugin, loc, task -> {
+                        block.setBlockData(blockData);
+                    });
+                    restored++;
+                } catch (Exception ignored) {}
+            }
+        }
+        return restored;
     }
 
     private void startResetTask() {
-        long intervalTicks = plugin.getConfig().getLong("arena-reset-interval", 300) * 20L;
         Thread thread = new Thread(() -> {
             while (plugin.isEnabled()) {
                 try {
                     Thread.sleep(plugin.getConfig().getLong("arena-reset-interval", 300) * 1000L);
-                    if (!placedBlocks.isEmpty()) {
+                    if (!arenas.isEmpty()) {
                         Bukkit.getGlobalRegionScheduler().run(plugin, task -> resetAllArenas());
                     }
                 } catch (InterruptedException e) {
@@ -180,12 +239,6 @@ public class ArenaManager {
             this.x = loc.getBlockX();
             this.y = loc.getBlockY();
             this.z = loc.getBlockZ();
-        }
-
-        public Location toLocation() {
-            World w = Bukkit.getWorld(world);
-            if (w == null) return null;
-            return new Location(w, x + 0.5, y, z + 0.5);
         }
 
         @Override
