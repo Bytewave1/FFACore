@@ -40,8 +40,6 @@ public class FFACore extends JavaPlugin {
         statsManager = new StatsManager(this);
 
         getCommand("adminsavekit").setExecutor(new AdminSaveKitCommand(this));
-        getCommand("savekit").setExecutor(new SaveKitCommand(this));
-        getCommand("kit").setExecutor(new KitCommand(this));
         getCommand("discord").setExecutor(new DiscordCommand(this));
         getCommand("shop").setExecutor(new ShopCommand(this));
         getCommand("coins").setExecutor(new CoinsCommand(this));
@@ -64,6 +62,7 @@ public class FFACore extends JavaPlugin {
         ResetStatsCommand deathResetCmd = new ResetStatsCommand(this, "death");
         getCommand("deathreset").setExecutor(deathResetCmd);
         getCommand("deathreset").setTabCompleter(deathResetCmd);
+        getCommand("ffareload").setExecutor(new ReloadCommand(this));
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);

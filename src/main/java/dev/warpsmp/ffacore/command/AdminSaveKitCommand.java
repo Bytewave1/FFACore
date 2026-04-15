@@ -21,9 +21,26 @@ public class AdminSaveKitCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessageManager().get("player-only"));
             return true;
         }
-        plugin.getKitManager().saveDefaultKit(player);
-        player.sendMessage(plugin.getMessageManager().get("kit-admin-saved",
-            MessageManager.of("amount", String.valueOf(plugin.getKitManager().getDefaultItemCount()))));
+
+        // Parse all arguments as kit numbers
+        if (args.length == 0) {
+            player.sendMessage("§cUsage: /adminsavekit <number> [number2] [number3] ...");
+            return true;
+        }
+
+        for (String arg : args) {
+            try {
+                int kitNumber = Integer.parseInt(arg);
+                if (kitNumber <= 0) {
+                    player.sendMessage("§cKit number must be positive: " + arg);
+                    continue;
+                }
+                plugin.getKitManager().saveAdminKit(kitNumber, player);
+                player.sendMessage("§aAdmin kit #" + kitNumber + " saved!");
+            } catch (NumberFormatException e) {
+                player.sendMessage("§cInvalid kit number: " + arg);
+            }
+        }
         return true;
     }
 }

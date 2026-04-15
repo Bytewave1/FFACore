@@ -93,12 +93,10 @@ public class DeathListener implements Listener {
                 if (plugin.getSpawnManager().hasSpawn()) {
                     victim.teleportAsync(plugin.getSpawnManager().getSpawn()).thenAccept(success -> {
                         if (success && PENDING_RESPAWN.remove(victim.getUniqueId())) {
-                            // Give kit with delay after teleport
+                            // Give random admin kit with delay after teleport
                             Scheduler.runPlayerDelayed(plugin, victim, () -> {
                                 if (!victim.isOnline()) return;
-                                if (plugin.getKitManager().hasKit()) {
-                                    plugin.getKitManager().giveKit(victim);
-                                }
+                                plugin.getKitManager().giveRandomAdminKit(victim);
                                 victim.showTitle(Title.title(
                                     plugin.getMessageManager().get("respawn-title"),
                                     plugin.getMessageManager().get("respawn-subtitle"),
@@ -109,9 +107,7 @@ public class DeathListener implements Listener {
                     });
                 } else {
                     if (PENDING_RESPAWN.remove(victim.getUniqueId())) {
-                        if (plugin.getKitManager().hasKit()) {
-                            plugin.getKitManager().giveKit(victim);
-                        }
+                        plugin.getKitManager().giveRandomAdminKit(victim);
                     }
                 }
             }, (long) delay);

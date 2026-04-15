@@ -10,12 +10,8 @@ softdepend: [PlaceholderAPI]
 
 commands:
   adminsavekit:
-    description: Save the default FFA kit (admin)
+    description: Save numbered FFA admin kits (admin)
     permission: ffacore.admin
-  savekit:
-    description: Save your personal kit layout
-  kit:
-    description: Get your FFA kit
   shop:
     description: Open the FFA shop
   coins:
@@ -45,6 +41,9 @@ commands:
     permission: ffacore.admin
   deathreset:
     description: Reset deaths for a player or all
+    permission: ffacore.admin
+  ffareload:
+    description: Reload FFACore config
     permission: ffacore.admin
 
 permissions:

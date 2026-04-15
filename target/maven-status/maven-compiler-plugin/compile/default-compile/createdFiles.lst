@@ -19,6 +19,7 @@ dev/warpsmp/ffacore/command/EventCommand.class
 dev/warpsmp/ffacore/listener/WandListener.class
 dev/warpsmp/ffacore/manager/SpawnManager.class
 dev/warpsmp/ffacore/listener/DeathListener.class
+dev/warpsmp/ffacore/command/ReloadCommand.class
 dev/warpsmp/ffacore/command/SaveKitCommand.class
 dev/warpsmp/ffacore/manager/EventManager.class
 dev/warpsmp/ffacore/command/CoinsCommand.class

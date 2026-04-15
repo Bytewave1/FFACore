@@ -20,6 +20,7 @@ public class JoinListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        boolean isFirstJoin = !player.hasPlayedBefore();
 
         // Always teleport to spawn + give kit, with slight delay for chunks to load
         Scheduler.runPlayerDelayed(plugin, player, () -> {
@@ -33,10 +34,20 @@ public class JoinListener implements Listener {
             if (plugin.getSpawnManager().hasSpawn()) {
                 Location spawn = plugin.getSpawnManager().getSpawn();
                 player.teleportAsync(spawn).thenAccept(success -> {
-                    if (success) {
-                        // No kit on join - only on death/respawn
+                    if (success && isFirstJoin) {
+                        // Give random admin kit on first join after teleport
+                        Scheduler.runPlayerDelayed(plugin, player, () -> {
+                            if (!player.isOnline()) return;
+                            plugin.getKitManager().giveRandomAdminKit(player);
+                        }, 3L);
                     }
                 });
+            } else if (isFirstJoin) {
+                // No spawn but first join - still give kit
+                Scheduler.runPlayerDelayed(plugin, player, () -> {
+                    if (!player.isOnline()) return;
+                    plugin.getKitManager().giveRandomAdminKit(player);
+                }, 3L);
             }
         }, 10L);
     }

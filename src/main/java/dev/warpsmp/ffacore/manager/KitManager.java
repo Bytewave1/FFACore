@@ -14,41 +14,69 @@ import java.util.*;
 public class KitManager {
 
     private final FFACore plugin;
-    private final File defaultFile;
     private final File playerKitsDir;
-    private YamlConfiguration defaultData;
+    private final File adminKitsDir;
 
     public KitManager(FFACore plugin) {
         this.plugin = plugin;
-        this.defaultFile = new File(plugin.getDataFolder(), "kit.yml");
         this.playerKitsDir = new File(plugin.getDataFolder(), "playerkits");
-        if (!defaultFile.exists()) {
-            try { defaultFile.createNewFile(); } catch (IOException ignored) {}
-        }
+        this.adminKitsDir = new File(plugin.getDataFolder(), "admin-kits");
         if (!playerKitsDir.exists()) {
             playerKitsDir.mkdirs();
         }
-        this.defaultData = YamlConfiguration.loadConfiguration(defaultFile);
-    }
-
-    // ====== DEFAULT KIT (admin) ======
-
-    public void saveDefaultKit(Player player) {
-        defaultData = new YamlConfiguration();
-        saveInventoryToConfig(defaultData, player);
-        try {
-            defaultData.save(defaultFile);
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed to save default kit: " + e.getMessage());
+        if (!adminKitsDir.exists()) {
+            adminKitsDir.mkdirs();
         }
     }
 
-    public boolean hasDefaultKit() {
-        return defaultData.contains("contents") || defaultData.contains("armor");
+    // ====== ADMIN KIT (numbered) ======
+
+    public void saveAdminKit(int kitNumber, Player player) {
+        File file = new File(adminKitsDir, "kit-" + kitNumber + ".yml");
+        YamlConfiguration data = new YamlConfiguration();
+        saveInventoryToConfig(data, player);
+        try {
+            data.save(file);
+            plugin.getLogger().info("Admin kit #" + kitNumber + " saved");
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save admin kit #" + kitNumber + ": " + e.getMessage());
+        }
     }
 
-    public int getDefaultItemCount() {
-        return countItems(defaultData);
+    public boolean hasAdminKit(int kitNumber) {
+        File file = new File(adminKitsDir, "kit-" + kitNumber + ".yml");
+        if (!file.exists()) return false;
+        YamlConfiguration data = YamlConfiguration.loadConfiguration(file);
+        return data.contains("contents") || data.contains("armor");
+    }
+
+    public List<Integer> getAllAdminKitNumbers() {
+        List<Integer> kits = new ArrayList<>();
+        if (!adminKitsDir.exists()) return kits;
+        File[] files = adminKitsDir.listFiles((dir, name) -> name.startsWith("kit-") && name.endsWith(".yml"));
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    String name = file.getName();
+                    int kitNum = Integer.parseInt(name.substring(4, name.length() - 4));
+                    kits.add(kitNum);
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        Collections.sort(kits);
+        return kits;
+    }
+
+    public YamlConfiguration getAdminKit(int kitNumber) {
+        File file = new File(adminKitsDir, "kit-" + kitNumber + ".yml");
+        if (!file.exists()) return null;
+        return YamlConfiguration.loadConfiguration(file);
+    }
+
+    public int getRandomAdminKitNumber() {
+        List<Integer> kits = getAllAdminKitNumbers();
+        if (kits.isEmpty()) return -1;
+        return kits.get(new Random().nextInt(kits.size()));
     }
 
     // ====== PLAYER KIT ======
@@ -77,16 +105,16 @@ public class KitManager {
     // ====== ITEM VALIDATION ======
 
     /**
-     * Checks if a player's current inventory has the same items as the default kit.
-     * Same materials and amounts, slot positions don't matter.
+     * Checks if a player's current inventory has the same items as an admin kit.
      */
-    public boolean matchesDefaultKit(Player player) {
-        if (!hasDefaultKit()) return false;
+    public boolean matchesAdminKit(Player player, int kitNumber) {
+        YamlConfiguration data = getAdminKit(kitNumber);
+        if (data == null) return false;
 
-        Map<Material, Integer> defaultItems = getItemMap(defaultData);
+        Map<Material, Integer> kitItems = getItemMap(data);
         Map<Material, Integer> playerItems = getPlayerItemMap(player);
 
-        return defaultItems.equals(playerItems);
+        return kitItems.equals(playerItems);
     }
 
     private Map<Material, Integer> getItemMap(YamlConfiguration data) {
@@ -138,13 +166,13 @@ public class KitManager {
     // ====== GIVE KIT ======
 
     public void giveKit(Player player) {
-        applyKit(player);
+        applyKit(player, -1);
         // Verify kit was applied after 5 ticks, re-apply if empty (Folia timing issues)
         Scheduler.runPlayerDelayed(plugin, player, () -> {
             if (!player.isOnline() || player.isDead()) return;
             if (player.getInventory().isEmpty()) {
                 plugin.getLogger().info("Kit re-apply for " + player.getName() + " (inventory was empty)");
-                applyKit(player);
+                applyKit(player, -1);
             }
         }, 5L);
         // Final safety net at 15 ticks
@@ -152,23 +180,63 @@ public class KitManager {
             if (!player.isOnline() || player.isDead()) return;
             if (player.getInventory().isEmpty()) {
                 plugin.getLogger().info("Kit final re-apply for " + player.getName());
-                applyKit(player);
+                applyKit(player, -1);
             }
         }, 15L);
     }
 
-    private void applyKit(Player player) {
-        YamlConfiguration data;
+    public void giveRandomAdminKit(Player player) {
+        int kitNum = getRandomAdminKitNumber();
+        if (kitNum == -1) {
+            // No admin kits available - clear inventory
+            player.getInventory().clear();
+            player.getInventory().setArmorContents(new ItemStack[4]);
+            player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
+            player.setHealth(player.getMaxHealth());
+            player.setFoodLevel(20);
+            player.setSaturation(20f);
+            player.setFireTicks(0);
+            player.getActivePotionEffects().forEach(e -> player.removePotionEffect(e.getType()));
+            return;
+        }
+        applyKit(player, kitNum);
+        // Verify kit was applied after 5 ticks, re-apply if empty
+        Scheduler.runPlayerDelayed(plugin, player, () -> {
+            if (!player.isOnline() || player.isDead()) return;
+            if (player.getInventory().isEmpty()) {
+                plugin.getLogger().info("Random kit re-apply for " + player.getName());
+                applyKit(player, kitNum);
+            }
+        }, 5L);
+    }
 
-        // Check for player-specific kit first
-        File playerFile = new File(playerKitsDir, player.getUniqueId() + ".yml");
-        if (playerFile.exists()) {
-            data = YamlConfiguration.loadConfiguration(playerFile);
-        } else {
-            data = defaultData;
+    private void applyKit(Player player, int kitNumber) {
+        YamlConfiguration data = null;
+
+        // If kitNumber >= 0, use admin kit
+        if (kitNumber >= 0) {
+            data = getAdminKit(kitNumber);
+        }
+        // Otherwise check for player-specific kit
+        if (data == null) {
+            File playerFile = new File(playerKitsDir, player.getUniqueId() + ".yml");
+            if (playerFile.exists()) {
+                data = YamlConfiguration.loadConfiguration(playerFile);
+            }
         }
 
-        if (!data.contains("contents") && !data.contains("armor")) return;
+        // If still no kit found, just clear inventory
+        if (data == null || (!data.contains("contents") && !data.contains("armor"))) {
+            player.getInventory().clear();
+            player.getInventory().setArmorContents(new ItemStack[4]);
+            player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
+            player.setHealth(player.getMaxHealth());
+            player.setFoodLevel(20);
+            player.setSaturation(20f);
+            player.setFireTicks(0);
+            player.getActivePotionEffects().forEach(e -> player.removePotionEffect(e.getType()));
+            return;
+        }
 
         player.getInventory().clear();
         player.getInventory().setArmorContents(new ItemStack[4]);
@@ -242,13 +310,5 @@ public class KitManager {
         if (data.contains("armor")) count += data.getConfigurationSection("armor").getKeys(false).size();
         if (data.contains("offhand")) count++;
         return count;
-    }
-
-    public boolean hasKit() {
-        return hasDefaultKit();
-    }
-
-    public int getItemCount() {
-        return getDefaultItemCount();
     }
 }

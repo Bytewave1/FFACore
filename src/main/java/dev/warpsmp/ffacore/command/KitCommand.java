@@ -22,43 +22,7 @@ public class KitCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessageManager().get("player-only"));
-            return true;
-        }
-
-        if (!plugin.getKitManager().hasKit()) {
-            sender.sendMessage(plugin.getMessageManager().get("kit-empty"));
-            return true;
-        }
-
-        // Combat check
-        if (plugin.getCombatManager().isInCombat(player.getUniqueId())) {
-            player.sendMessage(plugin.getMessageManager().get("kit-combat"));
-            return true;
-        }
-
-        // Cooldown check (everyone gets cooldown, no bypass)
-        {
-            long cooldownMs = plugin.getConfig().getLong("kit-cooldown", 600) * 1000L;
-            Long lastUse = cooldowns.get(player.getUniqueId());
-            if (lastUse != null) {
-                long remaining = (lastUse + cooldownMs) - System.currentTimeMillis();
-                if (remaining > 0) {
-                    long sec = remaining / 1000;
-                    long min = sec / 60;
-                    sec = sec % 60;
-                    String timeStr = min > 0 ? min + "m " + sec + "s" : sec + "s";
-                    player.sendMessage(plugin.getMessageManager().get("kit-cooldown",
-                        MessageManager.of("time", timeStr)));
-                    return true;
-                }
-            }
-        }
-
-        plugin.getKitManager().giveKit(player);
-        cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
-        player.sendMessage(plugin.getMessageManager().get("kit-given"));
+        sender.sendMessage("§cDieser Befehl ist nicht verfügbar!");
         return true;
     }
 }

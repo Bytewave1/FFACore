@@ -16,23 +16,7 @@ public class SaveKitCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessageManager().get("player-only"));
-            return true;
-        }
-
-        if (!plugin.getKitManager().hasDefaultKit()) {
-            player.sendMessage(plugin.getMessageManager().get("kit-no-default"));
-            return true;
-        }
-
-        if (!plugin.getKitManager().matchesDefaultKit(player)) {
-            player.sendMessage(plugin.getMessageManager().get("kit-mismatch"));
-            return true;
-        }
-
-        plugin.getKitManager().savePlayerKit(player);
-        player.sendMessage(plugin.getMessageManager().get("kit-saved"));
+        sender.sendMessage("§cDieser Befehl ist nicht verfügbar!");
         return true;
     }
 }

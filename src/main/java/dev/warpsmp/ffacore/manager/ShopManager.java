@@ -1,6 +1,7 @@
 package dev.warpsmp.ffacore.manager;
 
 import dev.warpsmp.ffacore.FFACore;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -84,7 +85,7 @@ public class ShopManager {
         if (fillerMat == null) fillerMat = Material.GRAY_STAINED_GLASS_PANE;
         ItemStack filler = new ItemStack(fillerMat);
         ItemMeta fillerMeta = filler.getItemMeta();
-        fillerMeta.displayName(mm.deserialize(config.getString("filler.name", " ")));
+        fillerMeta.displayName(mm.deserialize(config.getString("filler.name", " ")).decoration(TextDecoration.ITALIC, false));
         filler.setItemMeta(fillerMeta);
         for (int i = 0; i < size; i++) {
             inv.setItem(i, filler);
@@ -98,22 +99,22 @@ public class ShopManager {
             ItemStack display = new ItemStack(item.material);
             ItemMeta meta = display.getItemMeta();
 
-            meta.displayName(mm.deserialize(item.name));
+            meta.displayName(mm.deserialize(item.name).decoration(TextDecoration.ITALIC, false));
 
             List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
             for (String line : item.lore) {
                 String parsed = line
                     .replace("{price}", String.valueOf(item.price))
                     .replace("{duration}", String.valueOf(item.duration));
-                lore.add(mm.deserialize(parsed));
+                lore.add(mm.deserialize(parsed).decoration(TextDecoration.ITALIC, false));
             }
             // Add afford indicator
             if (coins >= item.price) {
-                lore.add(mm.deserialize(""));
-                lore.add(mm.deserialize("<green>ʏᴏᴜ ᴄᴀɴ ᴀғғᴏʀᴅ ᴛʜɪs</green>"));
+                lore.add(mm.deserialize("").decoration(TextDecoration.ITALIC, false));
+                lore.add(mm.deserialize("<green>ʏᴏᴜ ᴄᴀɴ ᴀғғᴏʀᴅ ᴛʜɪs</green>").decoration(TextDecoration.ITALIC, false));
             } else {
-                lore.add(mm.deserialize(""));
-                lore.add(mm.deserialize("<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs</red> <dark_gray>(" + coins + "/" + item.price + ")</dark_gray>"));
+                lore.add(mm.deserialize("").decoration(TextDecoration.ITALIC, false));
+                lore.add(mm.deserialize("<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs</red> <dark_gray>(" + coins + "/" + item.price + ")</dark_gray>").decoration(TextDecoration.ITALIC, false));
             }
             meta.setLore(null); // clear legacy lore
             meta.lore(lore);
