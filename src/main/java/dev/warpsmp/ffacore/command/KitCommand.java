@@ -32,14 +32,14 @@ public class KitCommand implements CommandExecutor {
             return true;
         }
 
-        // Combat check (bypass with permission)
-        if (!player.hasPermission("ffacore.kit.bypass") && plugin.getCombatManager().isInCombat(player.getUniqueId())) {
+        // Combat check
+        if (plugin.getCombatManager().isInCombat(player.getUniqueId())) {
             player.sendMessage(plugin.getMessageManager().get("kit-combat"));
             return true;
         }
 
-        // Cooldown check (bypass with permission)
-        if (!player.hasPermission("ffacore.kit.bypass")) {
+        // Cooldown check (everyone gets cooldown, no bypass)
+        {
             long cooldownMs = plugin.getConfig().getLong("kit-cooldown", 600) * 1000L;
             Long lastUse = cooldowns.get(player.getUniqueId());
             if (lastUse != null) {
