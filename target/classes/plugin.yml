@@ -44,6 +44,9 @@ commands:
     permission: ffacore.admin
   sell:
     description: Sell items for coins
+  tnt:
+    description: TNT zone management
+    permission: ffacore.admin
   ffareload:
     description: Reload FFACore config
     permission: ffacore.admin

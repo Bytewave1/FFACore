@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.block.BlockFormEvent;
@@ -21,15 +22,49 @@ public class BlockListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    // LOWEST: uncancel TNT placement that WorldGuard might have blocked
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onPlaceLowest(BlockPlaceEvent event) {
+        if (event.getBlock().getType() == Material.TNT) {
+            Location loc = event.getBlock().getLocation();
+            // Block TNT in no-tnt zones
+            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
+                event.setCancelled(true);
+                return;
+            }
+            // Force allow TNT everywhere else, override WorldGuard
+            event.setCancelled(false);
+        }
+    }
+
+    // MONITOR: final say — re-enforce TNT zone blocks, and handle instant ignite
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    public void onPlaceMonitor(BlockPlaceEvent event) {
+        if (event.getBlock().getType() == Material.TNT) {
+            Location loc = event.getBlock().getLocation();
+            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
+                event.setCancelled(true);
+                return;
+            }
+            // Force allow
+            event.setCancelled(false);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) return;
         Location loc = event.getBlock().getLocation();
         plugin.getArenaManager().trackBlock(loc);
 
         // Instant TNT ignite
         if (event.getBlock().getType() == Material.TNT) {
+            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
+                event.setCancelled(true);
+                return;
+            }
             event.getBlock().setType(Material.AIR);
-            loc.getWorld().spawn(loc.add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
+            loc.getWorld().spawn(loc.clone().add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
                 tnt.setFuseTicks(40);
                 tnt.setSource(event.getPlayer());
             });

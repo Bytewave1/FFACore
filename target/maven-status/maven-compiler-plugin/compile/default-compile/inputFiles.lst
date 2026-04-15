@@ -2,6 +2,7 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/util/Scheduler.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SpawnCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/AdminSaveKitCommand.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/TntZoneManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ReloadCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ShopCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/MessageManager.java
@@ -27,6 +28,7 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SetCoinsCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/placeholder/CoinsExpansion.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/StatsManager.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/TntCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/BlockProtectListener.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/DiscordCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ArenaResetCommand.java

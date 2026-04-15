@@ -12,10 +12,12 @@ dev/warpsmp/ffacore/command/ResetStatsCommand.class
 dev/warpsmp/ffacore/FFACore.class
 dev/warpsmp/ffacore/listener/CombatListener.class
 dev/warpsmp/ffacore/manager/MessageManager.class
+dev/warpsmp/ffacore/manager/TntZoneManager.class
 dev/warpsmp/ffacore/listener/BlockListener.class
 dev/warpsmp/ffacore/manager/ShopManager.class
 dev/warpsmp/ffacore/manager/ArenaManager$LocationKey.class
 dev/warpsmp/ffacore/manager/ArenaManager$Arena.class
+dev/warpsmp/ffacore/command/TntCommand.class
 dev/warpsmp/ffacore/command/EventCommand.class
 dev/warpsmp/ffacore/listener/WandListener.class
 dev/warpsmp/ffacore/manager/SpawnManager.class
@@ -23,6 +25,7 @@ dev/warpsmp/ffacore/listener/DeathListener.class
 dev/warpsmp/ffacore/command/ReloadCommand.class
 dev/warpsmp/ffacore/command/SaveKitCommand.class
 dev/warpsmp/ffacore/manager/EventManager.class
+dev/warpsmp/ffacore/manager/TntZoneManager$TntZone.class
 dev/warpsmp/ffacore/command/CoinsCommand.class
 dev/warpsmp/ffacore/command/KitCommand.class
 dev/warpsmp/ffacore/command/SetCoinsCommand.class
