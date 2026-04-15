@@ -1,16 +1,17 @@
 package dev.warpsmp.ffacore.command;
 
 import dev.warpsmp.ffacore.FFACore;
+import dev.warpsmp.ffacore.manager.MessageManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class SaveKitCommand implements CommandExecutor {
+public class AdminSaveKitCommand implements CommandExecutor {
 
     private final FFACore plugin;
 
-    public SaveKitCommand(FFACore plugin) {
+    public AdminSaveKitCommand(FFACore plugin) {
         this.plugin = plugin;
     }
 
@@ -20,19 +21,9 @@ public class SaveKitCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessageManager().get("player-only"));
             return true;
         }
-
-        if (!plugin.getKitManager().hasDefaultKit()) {
-            player.sendMessage(plugin.getMessageManager().get("kit-no-default"));
-            return true;
-        }
-
-        if (!plugin.getKitManager().matchesDefaultKit(player)) {
-            player.sendMessage(plugin.getMessageManager().get("kit-mismatch"));
-            return true;
-        }
-
-        plugin.getKitManager().savePlayerKit(player);
-        player.sendMessage(plugin.getMessageManager().get("kit-saved"));
+        plugin.getKitManager().saveDefaultKit(player);
+        player.sendMessage(plugin.getMessageManager().get("kit-admin-saved",
+            MessageManager.of("amount", String.valueOf(plugin.getKitManager().getDefaultItemCount()))));
         return true;
     }
 }

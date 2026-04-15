@@ -39,6 +39,7 @@ public class FFACore extends JavaPlugin {
         killstreakManager = new KillstreakManager(this);
         statsManager = new StatsManager(this);
 
+        getCommand("adminsavekit").setExecutor(new AdminSaveKitCommand(this));
         getCommand("savekit").setExecutor(new SaveKitCommand(this));
         getCommand("shop").setExecutor(new ShopCommand(this));
         getCommand("coins").setExecutor(new CoinsCommand(this));

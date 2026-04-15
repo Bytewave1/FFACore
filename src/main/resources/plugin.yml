@@ -8,9 +8,11 @@ authors: [Bytewave1]
 softdepend: [PlaceholderAPI]
 
 commands:
-  savekit:
-    description: Save your current inventory as the FFA kit
+  adminsavekit:
+    description: Save the default FFA kit (admin)
     permission: ffacore.admin
+  savekit:
+    description: Save your personal kit layout
   shop:
     description: Open the FFA shop
   coins:

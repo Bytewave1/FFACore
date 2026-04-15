@@ -17,9 +17,12 @@ coin-set: "{prefix}<gray>Set</gray> <white>{player}</white> <gray>coins to</gray
 coin-not-enough: "{prefix}<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs!</red> <dark_gray>(need {price})</dark_gray>"
 
 # Kit messages
-kit-saved: "{prefix}<green>ᴋɪᴛ sᴀᴠᴇᴅ!</green> <dark_gray>({amount} items)</dark_gray>"
+kit-saved: "{prefix}<green>ᴋɪᴛ ʟᴀʏᴏᴜᴛ sᴀᴠᴇᴅ!</green> <dark_gray>(your personal layout)</dark_gray>"
+kit-admin-saved: "{prefix}<green>ᴅᴇғᴀᴜʟᴛ ᴋɪᴛ sᴀᴠᴇᴅ!</green> <dark_gray>({amount} items)</dark_gray>"
 kit-given: "{prefix}<gray>ᴋɪᴛ ᴇǫᴜɪᴘᴘᴇᴅ</gray>"
-kit-empty: "{prefix}<red>No kit saved yet! Use /savekit first.</red>"
+kit-empty: "{prefix}<red>No kit saved yet! Use /adminsavekit first.</red>"
+kit-mismatch: "{prefix}<red>ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴛʜᴇ sᴀᴍᴇ ɪᴛᴇᴍs ᴀs ᴛʜᴇ ɴᴏʀᴍᴀʟ ᴋɪᴛ!</red>"
+kit-no-default: "{prefix}<red>No default kit set yet. Ask an admin.</red>"
 
 # Shop messages
 shop-title: "<gradient:#00ff88:#00cc66><bold>ғғᴀ sʜᴏᴘ</bold></gradient>"

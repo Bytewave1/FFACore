@@ -3,6 +3,7 @@ dev/warpsmp/ffacore/manager/KillstreakManager.class
 dev/warpsmp/ffacore/manager/ShopManager$ShopItem.class
 dev/warpsmp/ffacore/placeholder/CoinsExpansion.class
 dev/warpsmp/ffacore/manager/CombatManager.class
+dev/warpsmp/ffacore/command/AdminSaveKitCommand.class
 dev/warpsmp/ffacore/FFACore.class
 dev/warpsmp/ffacore/listener/CombatListener.class
 dev/warpsmp/ffacore/manager/MessageManager.class

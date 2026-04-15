@@ -1,5 +1,6 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/EventManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SpawnCommand.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/AdminSaveKitCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ShopCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/MessageManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/SpawnManager.java
