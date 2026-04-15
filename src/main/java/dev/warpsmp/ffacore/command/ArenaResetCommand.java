@@ -56,6 +56,18 @@ public class ArenaResetCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(plugin.getMessageManager().get("prefix")
                     .append(mm.deserialize("<green>ᴀʀᴇɴᴀ ᴡᴀɴᴅ</green> <dark_gray>received! Left/Right click to select.</dark_gray>")));
             }
+            case "pos1" -> {
+                POS1.put(player.getUniqueId(), player.getLocation().getBlock().getLocation());
+                player.sendMessage(mm.deserialize(
+                    "<gradient:#ff4444:#ffaa00><bold>ᴘᴏs 1</bold></gradient> <gray>set to</gray> <white>" +
+                    player.getLocation().getBlockX() + " " + player.getLocation().getBlockY() + " " + player.getLocation().getBlockZ() + "</white>"));
+            }
+            case "pos2" -> {
+                POS2.put(player.getUniqueId(), player.getLocation().getBlock().getLocation());
+                player.sendMessage(mm.deserialize(
+                    "<gradient:#ff4444:#ffaa00><bold>ᴘᴏs 2</bold></gradient> <gray>set to</gray> <white>" +
+                    player.getLocation().getBlockX() + " " + player.getLocation().getBlockY() + " " + player.getLocation().getBlockZ() + "</white>"));
+            }
             case "create" -> {
                 if (args.length < 2) {
                     player.sendMessage(plugin.getMessageManager().get("prefix")
@@ -121,6 +133,8 @@ public class ArenaResetCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(plugin.getMessageManager().get("prefix")
             .append(mm.deserialize("<green><bold>ᴀʀᴇɴᴀ ʀᴇsᴇᴛ</bold></green>")));
         player.sendMessage(mm.deserialize(" <green>/arenareset wand</green> <dark_gray>— Get selection wand</dark_gray>"));
+        player.sendMessage(mm.deserialize(" <green>/arenareset pos1</green> <dark_gray>— Set pos 1 at your location</dark_gray>"));
+        player.sendMessage(mm.deserialize(" <green>/arenareset pos2</green> <dark_gray>— Set pos 2 at your location</dark_gray>"));
         player.sendMessage(mm.deserialize(" <green>/arenareset create <name></green> <dark_gray>— Create arena from selection</dark_gray>"));
         player.sendMessage(mm.deserialize(" <green>/arenareset delete <name></green> <dark_gray>— Delete an arena</dark_gray>"));
         player.sendMessage(mm.deserialize(" <green>/arenareset list</green> <dark_gray>— List all arenas</dark_gray>"));
@@ -137,7 +151,7 @@ public class ArenaResetCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 1) {
             List<String> subs = new ArrayList<>();
-            for (String s : List.of("wand", "create", "delete", "list", "reset")) {
+            for (String s : List.of("wand", "pos1", "pos2", "create", "delete", "list", "reset")) {
                 if (s.startsWith(args[0].toLowerCase())) subs.add(s);
             }
             return subs;
