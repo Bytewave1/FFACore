@@ -13,6 +13,8 @@ commands:
     permission: ffacore.admin
   savekit:
     description: Save your personal kit layout
+  kit:
+    description: Get your FFA kit
   shop:
     description: Open the FFA shop
   coins:
@@ -45,4 +47,7 @@ commands:
 permissions:
   ffacore.admin:
     description: FFA Core admin permissions
+    default: op
+  ffacore.kit.bypass:
+    description: Bypass kit cooldown and combat check
     default: op

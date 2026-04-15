@@ -18,6 +18,9 @@ respawn-delay: 1
 # Spawn warmup in seconds (0 = instant)
 spawn-warmup: 3
 
+# Kit cooldown in seconds (600 = 10 minutes)
+kit-cooldown: 600
+
 # Arena reset interval in seconds (300 = 5 minutes)
 # All player-placed blocks inside arenas get cleared every X seconds
 arena-reset-interval: 300

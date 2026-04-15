@@ -1,5 +1,5 @@
 # FFACore Messages (MiniMessage format)
-# Placeholders: {player}, {killer}, {victim}, {coins}, {amount}, {item}, {price}, {duration}
+# Placeholders: {player}, {killer}, {victim}, {coins}, {amount}, {item}, {price}, {duration}, {time}
 
 prefix: "<gradient:#00ff88:#00cc66><bold>ғғᴀ</bold></gradient> <dark_gray>| </dark_gray>"
 
@@ -20,9 +20,11 @@ coin-not-enough: "{prefix}<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs!</red> <dark
 kit-saved: "{prefix}<green>ᴋɪᴛ ʟᴀʏᴏᴜᴛ sᴀᴠᴇᴅ!</green> <dark_gray>(your personal layout)</dark_gray>"
 kit-admin-saved: "{prefix}<green>ᴅᴇғᴀᴜʟᴛ ᴋɪᴛ sᴀᴠᴇᴅ!</green> <dark_gray>({amount} items)</dark_gray>"
 kit-given: "{prefix}<gray>ᴋɪᴛ ᴇǫᴜɪᴘᴘᴇᴅ</gray>"
-kit-empty: "{prefix}<red>No kit saved yet! Use /adminsavekit first.</red>"
+kit-empty: "{prefix}<red>No default kit set. Ask an admin to use /adminsavekit.</red>"
 kit-mismatch: "{prefix}<red>ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴛʜᴇ sᴀᴍᴇ ɪᴛᴇᴍs ᴀs ᴛʜᴇ ɴᴏʀᴍᴀʟ ᴋɪᴛ!</red>"
 kit-no-default: "{prefix}<red>No default kit set yet. Ask an admin.</red>"
+kit-combat: "{prefix}<red>ʏᴏᴜ ᴄᴀɴ'ᴛ ᴜsᴇ ᴛʜɪs ɪɴ ᴄᴏᴍʙᴀᴛ!</red>"
+kit-cooldown: "{prefix}<red>ᴋɪᴛ ᴏɴ ᴄᴏᴏʟᴅᴏᴡɴ!</red> <dark_gray>({time} remaining)</dark_gray>"
 
 # Shop messages
 shop-title: "<gradient:#00ff88:#00cc66><bold>ғғᴀ sʜᴏᴘ</bold></gradient>"
@@ -35,12 +37,6 @@ death-subtitle: "<gray>killed by</gray> <white>{killer}</white>"
 respawn-title: "<gradient:#00ff88:#00cc66><bold>ʀᴇsᴘᴀᴡɴᴇᴅ</bold></gradient>"
 respawn-subtitle: "<gray>ɢᴏᴏᴅ ʟᴜᴄᴋ</gray>"
 
-# General
-no-permission: "{prefix}<red>ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ</red>"
-player-only: "{prefix}<red>Only players can use this.</red>"
-player-not-found: "{prefix}<red>Player not found.</red>"
-usage-setcoins: "{prefix}<gray>Usage: /setcoins <player> <amount></gray>"
-
 # Combat tag
 combat-tag: "<gradient:#ff4444:#ff8888><bold>ɪɴ ᴄᴏᴍʙᴀᴛ</bold></gradient> <white>{time}s</white>"
 combat-end: "<green><bold>ᴄᴏᴍʙᴀᴛ ᴇɴᴅᴇᴅ</bold></green>"
@@ -48,9 +44,15 @@ combat-end: "<green><bold>ᴄᴏᴍʙᴀᴛ ᴇɴᴅᴇᴅ</bold></green>"
 # Spawn
 spawn-set: "{prefix}<green>sᴘᴀᴡɴ sᴇᴛ!</green> <dark_gray>(at your location)</dark_gray>"
 spawn-teleported: "{prefix}<green>ᴛᴇʟᴇᴘᴏʀᴛᴇᴅ ᴛᴏ sᴘᴀᴡɴ</green>"
-spawn-combat: "{prefix}<red>ᴅᴜ ʙɪsᴛ ɪᴍ ᴄᴏᴍʙᴀᴛ!</red> <dark_gray>(wait for timer)</dark_gray>"
+spawn-combat: "{prefix}<red>ʏᴏᴜ ᴄᴀɴ'ᴛ ᴛᴇʟᴇᴘᴏʀᴛ ɪɴ ᴄᴏᴍʙᴀᴛ!</red> <dark_gray>(wait for timer)</dark_gray>"
 spawn-not-set: "{prefix}<red>No spawn set yet.</red>"
 spawn-warmup: "{prefix}<gray>ᴛᴇʟᴇᴘᴏʀᴛ ɪɴ</gray> <white>{time}s</white> <dark_gray>(don't move)</dark_gray>"
 spawn-countdown: "<gradient:#00ff88:#00cc66><bold>sᴘᴀᴡɴ</bold></gradient> <white>{time}s</white>"
-spawn-cancelled: "{prefix}<red>ᴛᴇʟᴇᴘᴏʀᴛ ᴀʙɢᴇʙʀᴏᴄʜᴇɴ!</red> <dark_gray>(moved)</dark_gray>"
+spawn-cancelled: "{prefix}<red>ᴛᴇʟᴇᴘᴏʀᴛ ᴄᴀɴᴄᴇʟʟᴇᴅ!</red> <dark_gray>(you moved)</dark_gray>"
 spawn-already-warming: "{prefix}<red>Already teleporting...</red>"
+
+# General
+no-permission: "{prefix}<red>ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ</red>"
+player-only: "{prefix}<red>Only players can use this.</red>"
+player-not-found: "{prefix}<red>Player not found.</red>"
+usage-setcoins: "{prefix}<gray>Usage: /setcoins <player> <amount></gray>"

@@ -27,4 +27,5 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ArenaResetCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/ShopClickListener.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/WandListener.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/KitCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/AdminSetSpawnCommand.java
