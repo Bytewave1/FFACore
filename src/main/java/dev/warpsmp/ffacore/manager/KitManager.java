@@ -67,6 +67,16 @@ public class KitManager {
         return kits;
     }
 
+    public boolean deleteAdminKit(int kitNumber) {
+        File file = new File(adminKitsDir, "kit-" + kitNumber + ".yml");
+        if (file.exists()) {
+            file.delete();
+            plugin.getLogger().info("Admin kit #" + kitNumber + " deleted");
+            return true;
+        }
+        return false;
+    }
+
     public YamlConfiguration getAdminKit(int kitNumber) {
         File file = new File(adminKitsDir, "kit-" + kitNumber + ".yml");
         if (!file.exists()) return null;
