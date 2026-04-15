@@ -29,18 +29,9 @@ public class JoinListener implements Listener {
                 Location spawn = plugin.getSpawnManager().getSpawn();
                 player.teleportAsync(spawn).thenAccept(success -> {
                     if (success) {
-                        // Give kit after teleport
-                        player.getScheduler().run(plugin, t -> {
-                            if (plugin.getConfig().getBoolean("kit-on-join", true) && plugin.getKitManager().hasKit()) {
-                                plugin.getKitManager().giveKit(player);
-                                player.sendMessage(plugin.getMessageManager().get("kit-given"));
-                            }
-                        }, null);
+                        // No kit on join - only on death/respawn
                     }
                 });
-            } else if (plugin.getConfig().getBoolean("kit-on-join", true) && plugin.getKitManager().hasKit()) {
-                plugin.getKitManager().giveKit(player);
-                player.sendMessage(plugin.getMessageManager().get("kit-given"));
             }
         }, null, 10L);
     }

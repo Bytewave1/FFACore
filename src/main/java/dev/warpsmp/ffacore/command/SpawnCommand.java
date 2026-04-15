@@ -88,6 +88,11 @@ public class SpawnCommand implements CommandExecutor {
             }
             player.teleportAsync(plugin.getSpawnManager().getSpawn());
             player.sendMessage(plugin.getMessageManager().get("spawn-teleported"));
+            // Heal + clear effects but NO kit
+            player.setHealth(player.getMaxHealth());
+            player.setFoodLevel(20);
+            player.setSaturation(20f);
+            player.setFireTicks(0);
         }, null, (long) warmup * 20L);
 
         return true;
