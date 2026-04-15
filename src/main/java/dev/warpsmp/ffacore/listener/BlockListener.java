@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -23,8 +24,16 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
         Location loc = event.getBlock().getLocation();
-        // Track in arena manager for periodic reset
         plugin.getArenaManager().trackBlock(loc);
+
+        // Instant TNT ignite
+        if (event.getBlock().getType() == Material.TNT) {
+            event.getBlock().setType(Material.AIR);
+            loc.getWorld().spawn(loc.add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
+                tnt.setFuseTicks(40);
+                tnt.setSource(event.getPlayer());
+            });
+        }
     }
 
     @EventHandler
