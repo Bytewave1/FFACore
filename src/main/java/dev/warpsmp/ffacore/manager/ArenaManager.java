@@ -218,7 +218,7 @@ public class ArenaManager {
 
         // Load snapshot from plain text file
         Map<String, String> snapshot = new HashMap<>();
-        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(snapFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 int eq = line.indexOf('=');
@@ -230,7 +230,7 @@ public class ArenaManager {
             return 0;
         }
 
-        int restored = 0;
+        int scheduled = 0;
         for (Map.Entry<String, String> entry : snapshot.entrySet()) {
             String[] parts = entry.getKey().split(",");
             if (parts.length != 3) continue;
@@ -238,21 +238,21 @@ public class ArenaManager {
             int y = Integer.parseInt(parts[1]);
             int z = Integer.parseInt(parts[2]);
 
-            Block block = arena.world.getBlockAt(x, y, z);
-            String currentData = block.getBlockData().getAsString();
+            String originalData = entry.getValue();
+            Location loc = new Location(arena.world, x, y, z);
 
-            if (!currentData.equals(entry.getValue())) {
-                try {
-                    BlockData blockData = Bukkit.createBlockData(entry.getValue());
-                    Location loc = new Location(arena.world, x, y, z);
-                    Bukkit.getRegionScheduler().run(plugin, loc, task -> {
-                        block.setBlockData(blockData);
-                    });
-                    restored++;
-                } catch (Exception ignored) {}
-            }
+            // Use region scheduler — reads and writes block on the correct region thread
+            Bukkit.getRegionScheduler().run(plugin, loc, task -> {
+                Block block = loc.getBlock();
+                if (!block.getBlockData().getAsString().equals(originalData)) {
+                    try {
+                        block.setBlockData(Bukkit.createBlockData(originalData));
+                    } catch (Exception ignored) {}
+                }
+            });
+            scheduled++;
         }
-        return restored;
+        return scheduled;
     }
 
     private void startResetTask() {
@@ -261,7 +261,7 @@ public class ArenaManager {
                 try {
                     Thread.sleep(plugin.getConfig().getLong("arena-reset-interval", 300) * 1000L);
                     if (!arenas.isEmpty()) {
-                        Bukkit.getGlobalRegionScheduler().run(plugin, task -> resetAllArenas());
+                        resetAllArenas();
                     }
                 } catch (InterruptedException e) {
                     break;
