@@ -17,3 +17,6 @@ respawn-delay: 1
 
 # Spawn warmup in seconds (0 = instant)
 spawn-warmup: 3
+
+# Time in seconds before placed blocks get removed (0 = disabled)
+block-remove-delay: 60
