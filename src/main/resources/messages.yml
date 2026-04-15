@@ -47,3 +47,7 @@ spawn-set: "{prefix}<green>sᴘᴀᴡɴ sᴇᴛ!</green> <dark_gray>(at your loc
 spawn-teleported: "{prefix}<green>ᴛᴇʟᴇᴘᴏʀᴛᴇᴅ ᴛᴏ sᴘᴀᴡɴ</green>"
 spawn-combat: "{prefix}<red>ᴅᴜ ʙɪsᴛ ɪᴍ ᴄᴏᴍʙᴀᴛ!</red> <dark_gray>(wait for timer)</dark_gray>"
 spawn-not-set: "{prefix}<red>No spawn set yet.</red>"
+spawn-warmup: "{prefix}<gray>ᴛᴇʟᴇᴘᴏʀᴛ ɪɴ</gray> <white>{time}s</white> <dark_gray>(don't move)</dark_gray>"
+spawn-countdown: "<gradient:#00ff88:#00cc66><bold>sᴘᴀᴡɴ</bold></gradient> <white>{time}s</white>"
+spawn-cancelled: "{prefix}<red>ᴛᴇʟᴇᴘᴏʀᴛ ᴀʙɢᴇʙʀᴏᴄʜᴇɴ!</red> <dark_gray>(moved)</dark_gray>"
+spawn-already-warming: "{prefix}<red>Already teleporting...</red>"
