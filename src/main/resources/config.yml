@@ -24,6 +24,9 @@ kit-cooldown: 600
 # Discord invite link
 discord-link: "https://discord.gg/7xrrbvH4nA"
 
+# Spawn protection radius (no damage, no combat tag within this radius of spawn)
+spawn-protection-radius: 5.0
+
 # Arena reset interval in seconds (300 = 5 minutes)
 # All player-placed blocks inside arenas get cleared every X seconds
 arena-reset-interval: 300
