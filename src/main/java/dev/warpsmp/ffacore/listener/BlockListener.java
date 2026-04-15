@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 
 public class BlockListener implements Listener {
@@ -68,6 +69,21 @@ public class BlockListener implements Listener {
                 tnt.setFuseTicks(40);
                 tnt.setSource(event.getPlayer());
             });
+        }
+    }
+
+    // Force allow TNT explosions — override WorldGuard
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onExplode(EntityExplodeEvent event) {
+        if (event.getEntity() instanceof TNTPrimed) {
+            event.setCancelled(false);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    public void onExplodeMonitor(EntityExplodeEvent event) {
+        if (event.getEntity() instanceof TNTPrimed) {
+            event.setCancelled(false);
         }
     }
 
