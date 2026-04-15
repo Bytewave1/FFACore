@@ -51,3 +51,6 @@ permissions:
   ffacore.kit.bypass:
     description: Bypass kit cooldown and combat check
     default: op
+  ffacore.arena.bypass:
+    description: Bypass arena block protection (can break original blocks)
+    default: op

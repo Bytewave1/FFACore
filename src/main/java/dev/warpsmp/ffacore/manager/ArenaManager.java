@@ -22,6 +22,7 @@ public class ArenaManager {
     private YamlConfiguration data;
     private final Map<String, Arena> arenas = new LinkedHashMap<>();
     private final Set<LocationKey> placedBlocks = ConcurrentHashMap.newKeySet();
+    private final Map<String, Set<String>> snapshotCache = new ConcurrentHashMap<>();
 
     public ArenaManager(FFACore plugin) {
         this.plugin = plugin;
@@ -51,6 +52,24 @@ public class ArenaManager {
             arenas.put(name.toLowerCase(), arena);
         }
         plugin.getLogger().info("Loaded " + arenas.size() + " arenas");
+        loadSnapshotCaches();
+    }
+
+    private void loadSnapshotCaches() {
+        for (Arena arena : arenas.values()) {
+            File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
+            if (!snapFile.exists()) continue;
+            Set<String> keys = ConcurrentHashMap.newKeySet();
+            try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    int eq = line.indexOf('=');
+                    if (eq > 0) keys.add(line.substring(0, eq));
+                }
+            } catch (IOException ignored) {}
+            snapshotCache.put(arena.name.toLowerCase(), keys);
+            plugin.getLogger().info("Loaded snapshot cache for " + arena.name + ": " + keys.size() + " blocks");
+        }
     }
 
     public void save() {
@@ -97,6 +116,10 @@ public class ArenaManager {
                 }
             }
         }
+        // Update cache
+        snapshotCache.put(arena.name.toLowerCase(), ConcurrentHashMap.newKeySet(blocks.size()));
+        snapshotCache.get(arena.name.toLowerCase()).addAll(blocks.keySet());
+
         // Write to file async (plain text, not YAML — much faster)
         int count = blocks.size();
         Bukkit.getAsyncScheduler().runNow(plugin, task -> {
@@ -136,6 +159,22 @@ public class ArenaManager {
     public boolean isInAnyArena(Location loc) {
         for (Arena arena : arenas.values()) {
             if (arena.contains(loc)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a block at this location is an original arena block (in the snapshot).
+     */
+    public boolean isOriginalBlock(Location loc) {
+        for (Arena arena : arenas.values()) {
+            if (!arena.contains(loc)) continue;
+            Set<String> keys = snapshotCache.get(arena.name.toLowerCase());
+            if (keys == null) return false;
+            String key = loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+            if (!keys.contains(key)) return false;
+            // Key exists in snapshot = it's an original block (not air originally means protected)
+            return true;
         }
         return false;
     }
