@@ -72,7 +72,7 @@ public class SpawnCommand implements CommandExecutor {
                 String msg = plugin.getMessageManager().getRaw("spawn-countdown")
                     .replace("{time}", String.valueOf(sec));
                 player.sendActionBar(mm.deserialize(msg));
-            }, null, (long) (warmup - sec) * 20L);
+            }, null, Math.max(1L, (long) (warmup - sec) * 20L));
         }
 
         // Teleport after warmup
