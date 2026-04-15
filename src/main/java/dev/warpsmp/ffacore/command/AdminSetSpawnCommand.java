@@ -22,6 +22,8 @@ public class AdminSetSpawnCommand implements CommandExecutor {
             return true;
         }
         plugin.getSpawnManager().setSpawn(player.getLocation());
+        // Also set world spawn as fallback
+        player.getWorld().setSpawnLocation(player.getLocation());
         player.sendMessage(plugin.getMessageManager().get("spawn-set"));
         return true;
     }

@@ -62,21 +62,30 @@ public class DeathListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onRespawnLowest(PlayerRespawnEvent event) {
+        if (plugin.getSpawnManager().hasSpawn()) {
+            event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
+        }
+    }
 
-        // Set respawn location
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onRespawnHighest(PlayerRespawnEvent event) {
         if (plugin.getSpawnManager().hasSpawn()) {
             event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
         }
 
-        // Force teleport + kit after respawn (backup in case setRespawnLocation doesn't work on Folia)
+        Player player = event.getPlayer();
+
+        // Force teleport after respawn as absolute backup
         player.getScheduler().runDelayed(plugin, task -> {
             if (!player.isOnline()) return;
 
             if (plugin.getSpawnManager().hasSpawn()) {
-                player.teleportAsync(plugin.getSpawnManager().getSpawn());
+                Location spawn = plugin.getSpawnManager().getSpawn();
+                if (player.getLocation().distanceSquared(spawn) > 4) {
+                    player.teleportAsync(spawn);
+                }
             }
 
             if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
@@ -88,8 +97,8 @@ public class DeathListener implements Listener {
                         plugin.getMessageManager().get("respawn-subtitle"),
                         Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
                     ));
-                }, null, 5L);
+                }, null, 3L);
             }
-        }, null, 2L);
+        }, null, 1L);
     }
 }
