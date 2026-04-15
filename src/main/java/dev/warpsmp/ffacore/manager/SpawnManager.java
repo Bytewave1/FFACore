@@ -42,18 +42,23 @@ public class SpawnManager {
     }
 
     public void setSpawn(Location loc) {
-        this.spawn = loc;
+        this.spawn = loc.clone();
         this.loaded = true;
+        data = new YamlConfiguration();
         data.set("world", loc.getWorld().getName());
         data.set("x", loc.getX());
         data.set("y", loc.getY());
         data.set("z", loc.getZ());
-        data.set("yaw", loc.getYaw());
-        data.set("pitch", loc.getPitch());
+        data.set("yaw", (double) loc.getYaw());
+        data.set("pitch", (double) loc.getPitch());
         try {
             data.save(file);
+            plugin.getLogger().info("Spawn saved: " + loc.getWorld().getName() +
+                " " + loc.getBlockX() + " " + loc.getBlockY() + " " + loc.getBlockZ() +
+                " (file: " + file.getAbsolutePath() + ")");
         } catch (IOException e) {
-            plugin.getLogger().warning("Failed to save spawn: " + e.getMessage());
+            plugin.getLogger().severe("Failed to save spawn: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
