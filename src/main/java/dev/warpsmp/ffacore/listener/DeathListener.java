@@ -62,43 +62,36 @@ public class DeathListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onRespawnLowest(PlayerRespawnEvent event) {
-        if (plugin.getSpawnManager().hasSpawn()) {
-            event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
-        }
-    }
-
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onRespawnHighest(PlayerRespawnEvent event) {
+    public void onRespawn(PlayerRespawnEvent event) {
         if (plugin.getSpawnManager().hasSpawn()) {
             event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
         }
 
         Player player = event.getPlayer();
 
-        // Force teleport after respawn as absolute backup
+        // Force exact teleport after respawn — Minecraft scatters around world spawn, we override that
         player.getScheduler().runDelayed(plugin, task -> {
             if (!player.isOnline()) return;
-
             if (plugin.getSpawnManager().hasSpawn()) {
-                Location spawn = plugin.getSpawnManager().getSpawn();
-                if (player.getLocation().distanceSquared(spawn) > 4) {
-                    player.teleportAsync(spawn);
-                }
-            }
-
-            if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
-                player.getScheduler().runDelayed(plugin, t -> {
-                    if (!player.isOnline()) return;
-                    plugin.getKitManager().giveKit(player);
-                    player.showTitle(Title.title(
-                        plugin.getMessageManager().get("respawn-title"),
-                        plugin.getMessageManager().get("respawn-subtitle"),
-                        Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
-                    ));
-                }, null, 3L);
+                player.teleportAsync(plugin.getSpawnManager().getSpawn());
             }
         }, null, 1L);
+
+        // Kit + title slightly after teleport
+        player.getScheduler().runDelayed(plugin, task -> {
+            if (!player.isOnline()) return;
+            if (plugin.getSpawnManager().hasSpawn()) {
+                player.teleportAsync(plugin.getSpawnManager().getSpawn());
+            }
+            if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
+                plugin.getKitManager().giveKit(player);
+                player.showTitle(Title.title(
+                    plugin.getMessageManager().get("respawn-title"),
+                    plugin.getMessageManager().get("respawn-subtitle"),
+                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
+                ));
+            }
+        }, null, 5L);
     }
 }

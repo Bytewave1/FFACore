@@ -22,8 +22,9 @@ public class AdminSetSpawnCommand implements CommandExecutor {
             return true;
         }
         plugin.getSpawnManager().setSpawn(player.getLocation());
-        // Also set world spawn as fallback
+        // Set world spawn + disable spawn radius scatter
         player.getWorld().setSpawnLocation(player.getLocation());
+        player.getWorld().setGameRule(org.bukkit.GameRule.SPAWN_RADIUS, 0);
         player.sendMessage(plugin.getMessageManager().get("spawn-set"));
         return true;
     }
