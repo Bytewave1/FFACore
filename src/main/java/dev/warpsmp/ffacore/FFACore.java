@@ -56,6 +56,12 @@ public class FFACore extends JavaPlugin {
         getCommand("stats").setExecutor(statsCmd);
         getCommand("stats").setTabCompleter(statsCmd);
         getCommand("top").setExecutor(new TopCommand(this));
+        ResetStatsCommand killResetCmd = new ResetStatsCommand(this, "kill");
+        getCommand("killreset").setExecutor(killResetCmd);
+        getCommand("killreset").setTabCompleter(killResetCmd);
+        ResetStatsCommand deathResetCmd = new ResetStatsCommand(this, "death");
+        getCommand("deathreset").setExecutor(deathResetCmd);
+        getCommand("deathreset").setTabCompleter(deathResetCmd);
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);

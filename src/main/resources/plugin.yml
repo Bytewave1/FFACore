@@ -35,6 +35,12 @@ commands:
     description: View player stats
   top:
     description: View leaderboard
+  killreset:
+    description: Reset kills for a player or all
+    permission: ffacore.admin
+  deathreset:
+    description: Reset deaths for a player or all
+    permission: ffacore.admin
 
 permissions:
   ffacore.admin:
