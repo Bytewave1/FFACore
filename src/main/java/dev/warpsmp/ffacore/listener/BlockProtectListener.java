@@ -44,12 +44,12 @@ public class BlockProtectListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         if (player.hasPermission("ffacore.arena.bypass")) return;
 
-        // Always protect sandstone blocks everywhere
+        // Always protect sandstone blocks everywhere — overrides WorldGuard
         if (ALWAYS_PROTECTED.contains(event.getBlock().getType())) {
             event.setCancelled(true);
             return;
@@ -58,8 +58,24 @@ public class BlockProtectListener implements Listener {
         Location loc = event.getBlock().getLocation();
         if (!plugin.getArenaManager().isInAnyArena(loc)) return;
 
-        // Only allow breaking player-placed blocks
         if (plugin.getArenaManager().isOriginalBlock(loc)) {
+            event.setCancelled(true);
+        }
+    }
+
+    // Final safety net — runs last, re-cancels even if another plugin uncancelled
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    public void onBreakMonitor(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if (player.hasPermission("ffacore.arena.bypass")) return;
+
+        if (ALWAYS_PROTECTED.contains(event.getBlock().getType())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        Location loc = event.getBlock().getLocation();
+        if (plugin.getArenaManager().isInAnyArena(loc) && plugin.getArenaManager().isOriginalBlock(loc)) {
             event.setCancelled(true);
         }
     }
