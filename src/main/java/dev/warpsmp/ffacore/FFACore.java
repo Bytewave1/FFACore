@@ -16,6 +16,8 @@ public class FFACore extends JavaPlugin {
     private CombatManager combatManager;
     private SpawnManager spawnManager;
     private ArenaManager arenaManager;
+    private EventManager eventManager;
+    private KillstreakManager killstreakManager;
 
     @Override
     public void onEnable() {
@@ -32,6 +34,8 @@ public class FFACore extends JavaPlugin {
         combatManager = new CombatManager(this);
         spawnManager = new SpawnManager(this);
         arenaManager = new ArenaManager(this);
+        eventManager = new EventManager(this);
+        killstreakManager = new KillstreakManager(this);
 
         getCommand("savekit").setExecutor(new SaveKitCommand(this));
         getCommand("shop").setExecutor(new ShopCommand(this));
@@ -42,6 +46,9 @@ public class FFACore extends JavaPlugin {
         ArenaResetCommand arenaCmd = new ArenaResetCommand(this);
         getCommand("arenareset").setExecutor(arenaCmd);
         getCommand("arenareset").setTabCompleter(arenaCmd);
+        EventCommand eventCmd = new EventCommand(this);
+        getCommand("event").setExecutor(eventCmd);
+        getCommand("event").setTabCompleter(eventCmd);
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);
@@ -72,4 +79,6 @@ public class FFACore extends JavaPlugin {
     public CombatManager getCombatManager() { return combatManager; }
     public SpawnManager getSpawnManager() { return spawnManager; }
     public ArenaManager getArenaManager() { return arenaManager; }
+    public EventManager getEventManager() { return eventManager; }
+    public KillstreakManager getKillstreakManager() { return killstreakManager; }
 }

@@ -1,3 +1,4 @@
+dev/warpsmp/ffacore/manager/KillstreakManager.class
 dev/warpsmp/ffacore/manager/ShopManager$ShopItem.class
 dev/warpsmp/ffacore/placeholder/CoinsExpansion.class
 dev/warpsmp/ffacore/manager/CombatManager.class
@@ -8,10 +9,12 @@ dev/warpsmp/ffacore/listener/BlockListener.class
 dev/warpsmp/ffacore/manager/ShopManager.class
 dev/warpsmp/ffacore/manager/ArenaManager$LocationKey.class
 dev/warpsmp/ffacore/manager/ArenaManager$Arena.class
+dev/warpsmp/ffacore/command/EventCommand.class
 dev/warpsmp/ffacore/listener/WandListener.class
 dev/warpsmp/ffacore/manager/SpawnManager.class
 dev/warpsmp/ffacore/listener/DeathListener.class
 dev/warpsmp/ffacore/command/SaveKitCommand.class
+dev/warpsmp/ffacore/manager/EventManager.class
 dev/warpsmp/ffacore/command/CoinsCommand.class
 dev/warpsmp/ffacore/command/SetCoinsCommand.class
 dev/warpsmp/ffacore/command/SpawnCommand.class

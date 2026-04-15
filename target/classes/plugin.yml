@@ -26,6 +26,9 @@ commands:
   arenareset:
     description: Arena reset management
     permission: ffacore.admin
+  event:
+    description: Start/stop events
+    permission: ffacore.admin
 
 permissions:
   ffacore.admin:

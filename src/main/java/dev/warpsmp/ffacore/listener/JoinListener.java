@@ -24,6 +24,10 @@ public class JoinListener implements Listener {
         player.getScheduler().runDelayed(plugin, task -> {
             if (!player.isOnline()) return;
 
+            // Show active bossbars
+            plugin.getEventManager().showBarToPlayer(player);
+            plugin.getKillstreakManager().showBarToPlayer(player);
+
             // Teleport to spawn
             if (plugin.getSpawnManager().hasSpawn()) {
                 Location spawn = plugin.getSpawnManager().getSpawn();

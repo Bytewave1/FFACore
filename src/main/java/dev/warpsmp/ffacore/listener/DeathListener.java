@@ -38,15 +38,25 @@ public class DeathListener implements Listener {
         // Remove combat tag
         plugin.getCombatManager().remove(victim.getUniqueId());
 
+        // Reset victim killstreak
+        plugin.getKillstreakManager().resetStreak(victim.getUniqueId());
+
         if (killer != null && !killer.equals(victim)) {
             int amount = plugin.getConfig().getInt("coins-per-kill", 10);
+            if (plugin.getEventManager().isDoubleCoins()) {
+                amount *= 2;
+            }
             plugin.getCoinManager().addCoins(killer.getUniqueId(), amount);
             plugin.getCoinManager().save();
 
+            // Killstreak
+            plugin.getKillstreakManager().addKill(killer);
+
             int total = plugin.getCoinManager().getCoins(killer.getUniqueId());
+            String prefix = plugin.getEventManager().isDoubleCoins() ? "<#C800D4><bold>2x</bold></#C800D4> " : "";
 
             killer.sendMessage(plugin.getMessageManager().get("coin-earn",
-                MessageManager.of("amount", String.valueOf(amount), "coins", String.valueOf(total))));
+                MessageManager.of("amount", prefix + amount, "coins", String.valueOf(total))));
 
             plugin.getServer().sendMessage(
                 plugin.getMessageManager().getRandomKillMessage(killer.getName(), victim.getName()));
