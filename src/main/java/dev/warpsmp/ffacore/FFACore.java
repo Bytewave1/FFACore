@@ -42,6 +42,7 @@ public class FFACore extends JavaPlugin {
         getCommand("adminsavekit").setExecutor(new AdminSaveKitCommand(this));
         getCommand("savekit").setExecutor(new SaveKitCommand(this));
         getCommand("kit").setExecutor(new KitCommand(this));
+        getCommand("discord").setExecutor(new DiscordCommand(this));
         getCommand("shop").setExecutor(new ShopCommand(this));
         getCommand("coins").setExecutor(new CoinsCommand(this));
         getCommand("setcoins").setExecutor(new SetCoinsCommand(this));

@@ -21,6 +21,9 @@ spawn-warmup: 3
 # Kit cooldown in seconds (600 = 10 minutes)
 kit-cooldown: 600
 
+# Discord invite link
+discord-link: "https://discord.gg/7xrrbvH4nA"
+
 # Arena reset interval in seconds (300 = 5 minutes)
 # All player-placed blocks inside arenas get cleared every X seconds
 arena-reset-interval: 300

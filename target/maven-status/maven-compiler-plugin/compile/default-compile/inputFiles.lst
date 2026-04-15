@@ -25,6 +25,7 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/placeholder/CoinsExpansion.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/StatsManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/BlockProtectListener.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/DiscordCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ArenaResetCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/ShopClickListener.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/WandListener.java
