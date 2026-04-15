@@ -158,7 +158,7 @@ public class ShopManager {
         if (item.multiBuy) {
             openAmountMenu(player, item);
         } else {
-            purchaseItem(player, item, 1);
+            purchaseItem(player, item, 1, true);
         }
     }
 
@@ -183,11 +183,13 @@ public class ShopManager {
         int index = slot - 10;
         if (index < 0 || index >= amounts.size()) return;
         int amount = amounts.get(index);
-        purchaseItem(player, item, amount);
+        purchaseItem(player, item, amount, false);
         pendingMultiBuy.remove(player.getUniqueId());
+        // Go back to crystals after purchase
+        openCrystalsMenu(player);
     }
 
-    private void purchaseItem(Player player, ShopItem item, int amount) {
+    private void purchaseItem(Player player, ShopItem item, int amount, boolean closeAfter) {
         int totalPrice = item.price * amount;
         CoinManager cm = plugin.getCoinManager();
 
@@ -221,7 +223,7 @@ public class ShopManager {
         player.sendMessage(plugin.getMessageManager().get("shop-purchased",
             MessageManager.of("item", (amount > 1 ? amount + "x " : "") + item.rawName, "price", String.valueOf(totalPrice))));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f);
-        player.closeInventory();
+        if (closeAfter) player.closeInventory();
     }
 
     // ====== HELPERS ======
