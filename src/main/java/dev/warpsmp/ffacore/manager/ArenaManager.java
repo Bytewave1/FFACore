@@ -10,8 +10,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -88,25 +87,32 @@ public class ArenaManager {
     }
 
     private void saveSnapshot(Arena arena) {
-        File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
-        YamlConfiguration snap = new YamlConfiguration();
-        int count = 0;
+        // Collect block data on the region thread
+        Map<String, String> blocks = new HashMap<>();
         for (int x = arena.x1; x <= arena.x2; x++) {
             for (int y = arena.y1; y <= arena.y2; y++) {
                 for (int z = arena.z1; z <= arena.z2; z++) {
                     Block block = arena.world.getBlockAt(x, y, z);
-                    String key = x + "," + y + "," + z;
-                    snap.set(key, block.getBlockData().getAsString());
-                    count++;
+                    blocks.put(x + "," + y + "," + z, block.getBlockData().getAsString());
                 }
             }
         }
-        try {
-            snap.save(snapFile);
-            plugin.getLogger().info("Snapshot saved for arena " + arena.name + ": " + count + " blocks");
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed to save snapshot: " + e.getMessage());
-        }
+        // Write to file async (plain text, not YAML — much faster)
+        int count = blocks.size();
+        Bukkit.getAsyncScheduler().runNow(plugin, task -> {
+            File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
+            try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(snapFile))) {
+                for (Map.Entry<String, String> entry : blocks.entrySet()) {
+                    writer.write(entry.getKey());
+                    writer.write('=');
+                    writer.write(entry.getValue());
+                    writer.newLine();
+                }
+                plugin.getLogger().info("Snapshot saved for arena " + arena.name + ": " + count + " blocks");
+            } catch (IOException e) {
+                plugin.getLogger().warning("Failed to save snapshot: " + e.getMessage());
+            }
+        });
     }
 
     public boolean deleteArena(String name) {
@@ -160,25 +166,34 @@ public class ArenaManager {
         File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
         if (!snapFile.exists()) return 0;
 
-        YamlConfiguration snap = YamlConfiguration.loadConfiguration(snapFile);
-        int restored = 0;
+        // Load snapshot from plain text file
+        Map<String, String> snapshot = new HashMap<>();
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(snapFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int eq = line.indexOf('=');
+                if (eq < 0) continue;
+                snapshot.put(line.substring(0, eq), line.substring(eq + 1));
+            }
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to load snapshot: " + e.getMessage());
+            return 0;
+        }
 
-        for (String key : snap.getKeys(false)) {
-            String[] parts = key.split(",");
+        int restored = 0;
+        for (Map.Entry<String, String> entry : snapshot.entrySet()) {
+            String[] parts = entry.getKey().split(",");
             if (parts.length != 3) continue;
             int x = Integer.parseInt(parts[0]);
             int y = Integer.parseInt(parts[1]);
             int z = Integer.parseInt(parts[2]);
 
-            String originalData = snap.getString(key);
-            if (originalData == null) continue;
-
             Block block = arena.world.getBlockAt(x, y, z);
             String currentData = block.getBlockData().getAsString();
 
-            if (!currentData.equals(originalData)) {
+            if (!currentData.equals(entry.getValue())) {
                 try {
-                    BlockData blockData = Bukkit.createBlockData(originalData);
+                    BlockData blockData = Bukkit.createBlockData(entry.getValue());
                     Location loc = new Location(arena.world, x, y, z);
                     Bukkit.getRegionScheduler().run(plugin, loc, task -> {
                         block.setBlockData(blockData);
