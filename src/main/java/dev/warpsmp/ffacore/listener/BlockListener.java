@@ -21,7 +21,9 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
-        scheduleRemoval(event.getBlock().getLocation());
+        Location loc = event.getBlock().getLocation();
+        // Track in arena manager for periodic reset
+        plugin.getArenaManager().trackBlock(loc);
     }
 
     @EventHandler
@@ -30,7 +32,7 @@ public class BlockListener implements Listener {
         Bukkit.getRegionScheduler().runDelayed(plugin, loc, task -> {
             Block current = loc.getBlock();
             if (current.getType() == Material.WATER || current.getType() == Material.LAVA) {
-                scheduleRemoval(loc);
+                plugin.getArenaManager().trackBlock(loc);
             }
         }, 2L);
     }
@@ -39,18 +41,7 @@ public class BlockListener implements Listener {
     public void onBlockForm(BlockFormEvent event) {
         Material type = event.getNewState().getType();
         if (type == Material.COBBLESTONE || type == Material.STONE || type == Material.OBSIDIAN) {
-            scheduleRemoval(event.getBlock().getLocation());
+            plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
         }
-    }
-
-    private void scheduleRemoval(Location loc) {
-        long removeDelayTicks = plugin.getConfig().getLong("block-remove-delay", 60) * 20L;
-
-        Bukkit.getRegionScheduler().runDelayed(plugin, loc, task -> {
-            Block current = loc.getBlock();
-            if (current.getType() != Material.AIR) {
-                current.setType(Material.AIR);
-            }
-        }, removeDelayTicks);
     }
 }

@@ -15,6 +15,7 @@ public class FFACore extends JavaPlugin {
     private ShopManager shopManager;
     private CombatManager combatManager;
     private SpawnManager spawnManager;
+    private ArenaManager arenaManager;
 
     @Override
     public void onEnable() {
@@ -30,6 +31,7 @@ public class FFACore extends JavaPlugin {
         shopManager = new ShopManager(this);
         combatManager = new CombatManager(this);
         spawnManager = new SpawnManager(this);
+        arenaManager = new ArenaManager(this);
 
         getCommand("savekit").setExecutor(new SaveKitCommand(this));
         getCommand("shop").setExecutor(new ShopCommand(this));
@@ -37,12 +39,16 @@ public class FFACore extends JavaPlugin {
         getCommand("setcoins").setExecutor(new SetCoinsCommand(this));
         getCommand("adminsetspawn").setExecutor(new AdminSetSpawnCommand(this));
         getCommand("spawn").setExecutor(new SpawnCommand(this));
+        ArenaResetCommand arenaCmd = new ArenaResetCommand(this);
+        getCommand("arenareset").setExecutor(arenaCmd);
+        getCommand("arenareset").setTabCompleter(arenaCmd);
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);
         getServer().getPluginManager().registerEvents(new ShopClickListener(this), this);
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockListener(this), this);
+        getServer().getPluginManager().registerEvents(new WandListener(this), this);
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new CoinsExpansion(this).register();
@@ -65,4 +71,5 @@ public class FFACore extends JavaPlugin {
     public ShopManager getShopManager() { return shopManager; }
     public CombatManager getCombatManager() { return combatManager; }
     public SpawnManager getSpawnManager() { return spawnManager; }
+    public ArenaManager getArenaManager() { return arenaManager; }
 }

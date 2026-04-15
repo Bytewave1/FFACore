@@ -23,6 +23,9 @@ commands:
     permission: ffacore.admin
   spawn:
     description: Teleport to spawn
+  arenareset:
+    description: Arena reset management
+    permission: ffacore.admin
 
 permissions:
   ffacore.admin:
