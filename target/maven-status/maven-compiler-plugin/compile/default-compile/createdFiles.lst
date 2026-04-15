@@ -7,6 +7,7 @@ dev/warpsmp/ffacore/placeholder/CoinsExpansion.class
 dev/warpsmp/ffacore/manager/CombatManager.class
 dev/warpsmp/ffacore/util/Scheduler.class
 dev/warpsmp/ffacore/command/AdminSaveKitCommand.class
+dev/warpsmp/ffacore/command/SellCommand.class
 dev/warpsmp/ffacore/command/ResetStatsCommand.class
 dev/warpsmp/ffacore/FFACore.class
 dev/warpsmp/ffacore/listener/CombatListener.class

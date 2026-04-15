@@ -62,6 +62,7 @@ public class FFACore extends JavaPlugin {
         ResetStatsCommand deathResetCmd = new ResetStatsCommand(this, "death");
         getCommand("deathreset").setExecutor(deathResetCmd);
         getCommand("deathreset").setTabCompleter(deathResetCmd);
+        getCommand("sell").setExecutor(new SellCommand(this));
         getCommand("ffareload").setExecutor(new ReloadCommand(this));
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);

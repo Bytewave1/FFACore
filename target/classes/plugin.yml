@@ -42,6 +42,8 @@ commands:
   deathreset:
     description: Reset deaths for a player or all
     permission: ffacore.admin
+  sell:
+    description: Sell items for coins
   ffareload:
     description: Reload FFACore config
     permission: ffacore.admin
