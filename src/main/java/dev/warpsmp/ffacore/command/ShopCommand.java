@@ -20,7 +20,7 @@ public class ShopCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessageManager().get("player-only"));
             return true;
         }
-        plugin.getShopManager().openShop(player);
+        plugin.getShopManager().openMainMenu(player);
         return true;
     }
 }

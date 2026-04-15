@@ -1,92 +1,165 @@
 # FFACore Shop Configuration
-# Each item in the shop is a section with:
-#   material: The display material in the GUI
-#   name: Display name (MiniMessage)
-#   lore: Lore lines (MiniMessage), use {price} and {duration}
-#   slot: GUI slot (0-53)
-#   price: Cost in coins
-#   type: "effect" or "items"
-#
-# For type "effect":
-#   effect: Potion effect type (STRENGTH, SPEED, REGENERATION, etc.)
-#   amplifier: Effect level (0 = I, 1 = II, 2 = III)
-#   duration: Duration in seconds
-#
-# For type "items":
-#   items: List of items to give (material:amount)
+# MiniMessage supported everywhere
 
-title: "<gradient:#00ff88:#00cc66><bold>ғғᴀ sʜᴏᴘ</bold></gradient>"
-size: 27
+# Main menu
+main-menu:
+  title: "<gradient:#00ff88:#00cc66><bold>ғғᴀ sʜᴏᴘ</bold></gradient>"
+  size: 27
+  items:
+    effects:
+      slot: 11
+      material: BREWING_STAND
+      name: "<gradient:#ff4444:#ff8888><bold>ᴇғғᴇᴄᴛs</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase powerful effects</gray>"
+        - "<gray>to gain an advantage!</gray>"
+        - ""
+        - "<yellow>Click to browse!</yellow>"
+    crystals:
+      slot: 13
+      material: END_CRYSTAL
+      name: "<gradient:#aa55ff:#ff55ff><bold>ᴄʀʏsᴛᴀʟs & ᴏʙsɪᴅɪᴀɴ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Buy End Crystals and</gray>"
+        - "<gray>Obsidian for combat!</gray>"
+        - ""
+        - "<yellow>Click to browse!</yellow>"
+    coming-soon:
+      slot: 15
+      material: BARRIER
+      name: "<dark_gray><bold>ᴄᴏᴍɪɴɢ sᴏᴏɴ</bold></dark_gray>"
+      lore:
+        - ""
+        - "<dark_gray>More items coming soon...</dark_gray>"
+        - ""
 
-items:
-  strength:
-    material: BLAZE_POWDER
-    name: "<gradient:#ff4444:#ff8888><bold>sᴛʀᴇɴɢᴛʜ ɪɪ</bold></gradient>"
-    lore:
-      - ""
-      - "<gray>Grants <red>Strength II</red> for <white>{duration}s</white></gray>"
-      - ""
-      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
-      - ""
-      - "<yellow>Click to purchase!</yellow>"
-    slot: 10
-    price: 100
-    type: effect
-    effect: STRENGTH
-    amplifier: 1
-    duration: 300
+# Effects category
+effects-menu:
+  title: "<gradient:#ff4444:#ff8888><bold>ᴇғғᴇᴄᴛs</bold></gradient>"
+  size: 27
+  items:
+    strength:
+      slot: 10
+      material: BLAZE_POWDER
+      name: "<gradient:#ff4444:#ff8888><bold>sᴛʀᴇɴɢᴛʜ ɪɪɪ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Grants <red>Strength III</red> for <white>1.5 min</white></gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 100
+      type: effect
+      effect: STRENGTH
+      amplifier: 2
+      duration: 90
+    speed:
+      slot: 12
+      material: SUGAR
+      name: "<gradient:#55ffff:#55aaff><bold>sᴘᴇᴇᴅ ɪɪ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Grants <aqua>Speed II</aqua> for <white>5 min</white></gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 75
+      type: effect
+      effect: SPEED
+      amplifier: 1
+      duration: 300
+    regeneration:
+      slot: 14
+      material: GHAST_TEAR
+      name: "<gradient:#ff55ff:#ffaaff><bold>ʀᴇɢᴇɴ ɪɪ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Grants <light_purple>Regen II</light_purple> for <white>3 min</white></gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 150
+      type: effect
+      effect: REGENERATION
+      amplifier: 1
+      duration: 180
+    golden-apples:
+      slot: 16
+      material: GOLDEN_APPLE
+      name: "<gradient:#ffaa00:#ffdd00><bold>ɢᴏʟᴅᴇɴ ᴀᴘᴘʟᴇs</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Receive <gold>3x Golden Apples</gold></gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 50
+      type: items
+      items:
+        - "GOLDEN_APPLE:3"
 
-  speed:
-    material: SUGAR
-    name: "<gradient:#55ffff:#55aaff><bold>sᴘᴇᴇᴅ ɪɪ</bold></gradient>"
-    lore:
-      - ""
-      - "<gray>Grants <aqua>Speed II</aqua> for <white>{duration}s</white></gray>"
-      - ""
-      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
-      - ""
-      - "<yellow>Click to purchase!</yellow>"
-    slot: 12
-    price: 75
-    type: effect
-    effect: SPEED
-    amplifier: 1
-    duration: 300
+# Crystals category
+crystals-menu:
+  title: "<gradient:#aa55ff:#ff55ff><bold>ᴄʀʏsᴛᴀʟs & ᴏʙsɪᴅɪᴀɴ</bold></gradient>"
+  size: 27
+  items:
+    crystal:
+      slot: 11
+      material: END_CRYSTAL
+      name: "<gradient:#aa55ff:#ff55ff><bold>ᴇɴᴅ ᴄʀʏsᴛᴀʟ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase End Crystals</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green> each</dark_gray>"
+        - ""
+        - "<yellow>Click to select amount!</yellow>"
+      price: 80
+      type: items
+      items:
+        - "END_CRYSTAL:1"
+      multi-buy: true
+    obsidian:
+      slot: 15
+      material: OBSIDIAN
+      name: "<gradient:#333333:#555555><bold>ᴏʙsɪᴅɪᴀɴ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase Obsidian blocks</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green> each</dark_gray>"
+        - ""
+        - "<yellow>Click to select amount!</yellow>"
+      price: 20
+      type: items
+      items:
+        - "OBSIDIAN:1"
+      multi-buy: true
 
-  regeneration:
-    material: GHAST_TEAR
-    name: "<gradient:#ff55ff:#ffaaff><bold>ʀᴇɢᴇɴ ɪɪ</bold></gradient>"
-    lore:
-      - ""
-      - "<gray>Grants <light_purple>Regen II</light_purple> for <white>{duration}s</white></gray>"
-      - ""
-      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
-      - ""
-      - "<yellow>Click to purchase!</yellow>"
-    slot: 14
-    price: 150
-    type: effect
-    effect: REGENERATION
-    amplifier: 1
-    duration: 180
+# Amount selection menu for multi-buy items
+amount-menu:
+  title: "<gradient:#00ff88:#00cc66><bold>sᴇʟᴇᴄᴛ ᴀᴍᴏᴜɴᴛ</bold></gradient>"
+  size: 27
+  amounts:
+    - 1
+    - 2
+    - 4
+    - 8
+    - 16
+    - 32
+    - 64
 
-  golden-apples:
-    material: GOLDEN_APPLE
-    name: "<gradient:#ffaa00:#ffdd00><bold>ɢᴏʟᴅᴇɴ ᴀᴘᴘʟᴇs</bold></gradient>"
-    lore:
-      - ""
-      - "<gray>Receive <gold>3x Golden Apples</gold></gray>"
-      - ""
-      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
-      - ""
-      - "<yellow>Click to purchase!</yellow>"
-    slot: 16
-    price: 50
-    type: items
-    items:
-      - "GOLDEN_APPLE:3"
-
-# Filler item for empty slots
 filler:
   material: GRAY_STAINED_GLASS_PANE
   name: " "
+
+back-button:
+  material: ARROW
+  name: "<gray><bold>← ʙᴀᴄᴋ</bold></gray>"
+  slot: 22

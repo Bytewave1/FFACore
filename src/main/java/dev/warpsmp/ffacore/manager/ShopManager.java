@@ -1,6 +1,7 @@
 package dev.warpsmp.ffacore.manager;
 
 import dev.warpsmp.ffacore.FFACore;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -15,19 +16,22 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ShopManager {
 
     private final FFACore plugin;
     private final MiniMessage mm = MiniMessage.miniMessage();
     private YamlConfiguration config;
-    private final Map<Integer, ShopItem> shopItems = new HashMap<>();
-    private String title;
-    private int size;
+
+    // Menu identifiers stored in inventory title
+    public static final String MAIN_ID = "ffashop:main";
+    public static final String EFFECTS_ID = "ffashop:effects";
+    public static final String CRYSTALS_ID = "ffashop:crystals";
+    public static final String AMOUNT_ID = "ffashop:amount";
+
+    // Per-player pending multi-buy
+    private final Map<UUID, ShopItem> pendingMultiBuy = new HashMap<>();
 
     public ShopManager(FFACore plugin) {
         this.plugin = plugin;
@@ -36,129 +40,318 @@ public class ShopManager {
 
     public void reload() {
         config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "shop.yml"));
-        shopItems.clear();
-        title = config.getString("title", "<bold>Shop</bold>");
-        size = config.getInt("size", 27);
-
-        ConfigurationSection items = config.getConfigurationSection("items");
-        if (items == null) return;
-
-        for (String key : items.getKeys(false)) {
-            ConfigurationSection section = items.getConfigurationSection(key);
-            if (section == null) continue;
-
-            ShopItem item = new ShopItem();
-            item.key = key;
-            item.material = Material.matchMaterial(section.getString("material", "STONE"));
-            item.name = section.getString("name", key);
-            item.lore = section.getStringList("lore");
-            item.slot = section.getInt("slot", 0);
-            item.price = section.getInt("price", 100);
-            item.type = section.getString("type", "effect");
-
-            if ("effect".equals(item.type)) {
-                String effectName = section.getString("effect", "STRENGTH");
-                item.effectType = PotionEffectType.getByName(effectName);
-                item.amplifier = section.getInt("amplifier", 0);
-                item.duration = section.getInt("duration", 300);
-            } else if ("items".equals(item.type)) {
-                item.giveItems = new ArrayList<>();
-                for (String entry : section.getStringList("items")) {
-                    String[] parts = entry.split(":");
-                    Material mat = Material.matchMaterial(parts[0]);
-                    int amount = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
-                    if (mat != null) {
-                        item.giveItems.add(new ItemStack(mat, amount));
-                    }
-                }
-            }
-
-            shopItems.put(item.slot, item);
-        }
     }
 
-    public void openShop(Player player) {
-        Inventory inv = Bukkit.createInventory(null, size, mm.deserialize(title));
+    // ====== OPEN MENUS ======
 
-        // Fill with glass panes
-        Material fillerMat = Material.matchMaterial(config.getString("filler.material", "GRAY_STAINED_GLASS_PANE"));
-        if (fillerMat == null) fillerMat = Material.GRAY_STAINED_GLASS_PANE;
-        ItemStack filler = new ItemStack(fillerMat);
-        ItemMeta fillerMeta = filler.getItemMeta();
-        fillerMeta.displayName(mm.deserialize(config.getString("filler.name", " ")).decoration(TextDecoration.ITALIC, false));
-        filler.setItemMeta(fillerMeta);
-        for (int i = 0; i < size; i++) {
-            inv.setItem(i, filler);
-        }
-
-        int coins = plugin.getCoinManager().getCoins(player.getUniqueId());
-
-        // Place shop items
-        for (ShopItem item : shopItems.values()) {
-            if (item.material == null) continue;
-            ItemStack display = new ItemStack(item.material);
-            ItemMeta meta = display.getItemMeta();
-
-            meta.displayName(mm.deserialize(item.name).decoration(TextDecoration.ITALIC, false));
-
-            List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
-            for (String line : item.lore) {
-                String parsed = line
-                    .replace("{price}", String.valueOf(item.price))
-                    .replace("{duration}", String.valueOf(item.duration));
-                lore.add(mm.deserialize(parsed).decoration(TextDecoration.ITALIC, false));
-            }
-            // Add afford indicator
-            if (coins >= item.price) {
-                lore.add(mm.deserialize("").decoration(TextDecoration.ITALIC, false));
-                lore.add(mm.deserialize("<green>ʏᴏᴜ ᴄᴀɴ ᴀғғᴏʀᴅ ᴛʜɪs</green>").decoration(TextDecoration.ITALIC, false));
-            } else {
-                lore.add(mm.deserialize("").decoration(TextDecoration.ITALIC, false));
-                lore.add(mm.deserialize("<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs</red> <dark_gray>(" + coins + "/" + item.price + ")</dark_gray>").decoration(TextDecoration.ITALIC, false));
-            }
-            meta.setLore(null); // clear legacy lore
-            meta.lore(lore);
-            display.setItemMeta(meta);
-
-            inv.setItem(item.slot, display);
-        }
-
+    public void openMainMenu(Player player) {
+        ConfigurationSection sec = config.getConfigurationSection("main-menu");
+        if (sec == null) return;
+        Inventory inv = createMenu(sec, MAIN_ID);
+        fillEmpty(inv, sec.getInt("size", 27));
+        addCategoryItems(inv, sec);
         player.openInventory(inv);
     }
 
-    public ShopItem getItem(int slot) {
-        return shopItems.get(slot);
+    public void openEffectsMenu(Player player) {
+        ConfigurationSection sec = config.getConfigurationSection("effects-menu");
+        if (sec == null) return;
+        Inventory inv = createMenu(sec, EFFECTS_ID);
+        fillEmpty(inv, sec.getInt("size", 27));
+        addShopItems(inv, sec, player);
+        addBackButton(inv, sec.getInt("size", 27));
+        player.openInventory(inv);
     }
 
-    public boolean purchase(Player player, ShopItem item) {
+    public void openCrystalsMenu(Player player) {
+        ConfigurationSection sec = config.getConfigurationSection("crystals-menu");
+        if (sec == null) return;
+        Inventory inv = createMenu(sec, CRYSTALS_ID);
+        fillEmpty(inv, sec.getInt("size", 27));
+        addShopItems(inv, sec, player);
+        addBackButton(inv, sec.getInt("size", 27));
+        player.openInventory(inv);
+    }
+
+    public void openAmountMenu(Player player, ShopItem item) {
+        pendingMultiBuy.put(player.getUniqueId(), item);
+        ConfigurationSection sec = config.getConfigurationSection("amount-menu");
+        if (sec == null) return;
+        int size = sec.getInt("size", 27);
+        String title = sec.getString("title", "Select Amount");
+        Inventory inv = Bukkit.createInventory(null, size, mm.deserialize(title + "<!--" + AMOUNT_ID + "-->"));
+        fillEmpty(inv, size);
+
+        List<Integer> amounts = sec.getIntegerList("amounts");
+        int coins = plugin.getCoinManager().getCoins(player.getUniqueId());
+        int startSlot = 10;
+
+        for (int i = 0; i < amounts.size() && startSlot <= 16; i++) {
+            int amount = amounts.get(i);
+            int totalPrice = item.price * amount;
+            boolean canAfford = coins >= totalPrice;
+
+            ItemStack display = new ItemStack(item.material, Math.min(64, amount));
+            ItemMeta meta = display.getItemMeta();
+            meta.displayName(noItalic(mm.deserialize(
+                "<white><bold>" + amount + "x</bold></white> " + item.name)));
+            List<Component> lore = new ArrayList<>();
+            lore.add(noItalic(mm.deserialize("")));
+            lore.add(noItalic(mm.deserialize("<dark_gray>ᴘʀɪᴄᴇ: <green>" + totalPrice + " ᴄᴏɪɴs</green></dark_gray>")));
+            lore.add(noItalic(mm.deserialize("")));
+            if (canAfford) {
+                lore.add(noItalic(mm.deserialize("<green>ʏᴏᴜ ᴄᴀɴ ᴀғғᴏʀᴅ ᴛʜɪs</green>")));
+            } else {
+                lore.add(noItalic(mm.deserialize("<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs</red> <dark_gray>(" + coins + "/" + totalPrice + ")</dark_gray>")));
+            }
+            meta.lore(lore);
+            display.setItemMeta(meta);
+            inv.setItem(startSlot, display);
+            startSlot++;
+        }
+
+        addBackButton(inv, size);
+        player.openInventory(inv);
+    }
+
+    // ====== MENU IDENTIFICATION ======
+
+    public String getMenuId(Component title) {
+        String plain = MiniMessage.miniMessage().serialize(title);
+        if (plain.contains(MAIN_ID)) return MAIN_ID;
+        if (plain.contains(EFFECTS_ID)) return EFFECTS_ID;
+        if (plain.contains(CRYSTALS_ID)) return CRYSTALS_ID;
+        if (plain.contains(AMOUNT_ID)) return AMOUNT_ID;
+        return null;
+    }
+
+    // ====== CLICK HANDLING ======
+
+    public void handleMainClick(Player player, int slot) {
+        ConfigurationSection items = config.getConfigurationSection("main-menu.items");
+        if (items == null) return;
+        for (String key : items.getKeys(false)) {
+            int itemSlot = items.getInt(key + ".slot", -1);
+            if (itemSlot != slot) continue;
+            switch (key) {
+                case "effects" -> openEffectsMenu(player);
+                case "crystals" -> openCrystalsMenu(player);
+                // coming-soon does nothing
+            }
+        }
+    }
+
+    public void handleCategoryClick(Player player, int slot, String menuId) {
+        String menuKey = EFFECTS_ID.equals(menuId) ? "effects-menu" : "crystals-menu";
+        ShopItem item = getShopItemAt(menuKey, slot);
+        if (item == null) {
+            // Check back button
+            ConfigurationSection sec = config.getConfigurationSection(menuKey);
+            int size = sec != null ? sec.getInt("size", 27) : 27;
+            int backSlot = config.getInt("back-button.slot", size - 5);
+            if (slot == backSlot) openMainMenu(player);
+            return;
+        }
+        if (item.multiBuy) {
+            openAmountMenu(player, item);
+        } else {
+            purchaseItem(player, item, 1);
+        }
+    }
+
+    public void handleAmountClick(Player player, int slot) {
+        ShopItem item = pendingMultiBuy.get(player.getUniqueId());
+        if (item == null) {
+            openMainMenu(player);
+            return;
+        }
+
+        // Check back button
+        ConfigurationSection sec = config.getConfigurationSection("amount-menu");
+        int size = sec != null ? sec.getInt("size", 27) : 27;
+        int backSlot = config.getInt("back-button.slot", size - 5);
+        if (slot == backSlot) {
+            pendingMultiBuy.remove(player.getUniqueId());
+            openCrystalsMenu(player);
+            return;
+        }
+
+        List<Integer> amounts = sec != null ? sec.getIntegerList("amounts") : List.of();
+        int index = slot - 10;
+        if (index < 0 || index >= amounts.size()) return;
+        int amount = amounts.get(index);
+        purchaseItem(player, item, amount);
+        pendingMultiBuy.remove(player.getUniqueId());
+    }
+
+    private void purchaseItem(Player player, ShopItem item, int amount) {
+        int totalPrice = item.price * amount;
         CoinManager cm = plugin.getCoinManager();
-        if (!cm.removeCoins(player.getUniqueId(), item.price)) return false;
+
+        if (cm.getCoins(player.getUniqueId()) < totalPrice) {
+            player.sendMessage(plugin.getMessageManager().get("coin-not-enough",
+                MessageManager.of("price", String.valueOf(totalPrice))));
+            return;
+        }
+
+        if ("effect".equals(item.type) && item.effectType != null) {
+            if (player.hasPotionEffect(item.effectType)) {
+                player.sendMessage(plugin.getMessageManager().get("shop-active",
+                    MessageManager.of("item", item.rawName)));
+                return;
+            }
+        }
+
+        cm.removeCoins(player.getUniqueId(), totalPrice);
+        cm.save();
 
         if ("effect".equals(item.type) && item.effectType != null) {
             player.addPotionEffect(new PotionEffect(item.effectType, item.duration * 20, item.amplifier, false, true, true));
         } else if ("items".equals(item.type) && item.giveItems != null) {
             for (ItemStack give : item.giveItems) {
-                player.getInventory().addItem(give.clone());
+                ItemStack clone = give.clone();
+                clone.setAmount(give.getAmount() * amount);
+                player.getInventory().addItem(clone);
             }
         }
 
-        cm.save();
-        return true;
+        player.sendMessage(plugin.getMessageManager().get("shop-purchased",
+            MessageManager.of("item", (amount > 1 ? amount + "x " : "") + item.rawName, "price", String.valueOf(totalPrice))));
+        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f);
+        player.closeInventory();
     }
 
-    public String getTitle() { return title; }
+    // ====== HELPERS ======
+
+    private Inventory createMenu(ConfigurationSection sec, String id) {
+        int size = sec.getInt("size", 27);
+        String title = sec.getString("title", "Shop");
+        return Bukkit.createInventory(null, size, mm.deserialize(title + "<!--" + id + "-->"));
+    }
+
+    private void fillEmpty(Inventory inv, int size) {
+        Material fillerMat = Material.matchMaterial(config.getString("filler.material", "GRAY_STAINED_GLASS_PANE"));
+        if (fillerMat == null) fillerMat = Material.GRAY_STAINED_GLASS_PANE;
+        ItemStack filler = new ItemStack(fillerMat);
+        ItemMeta fm = filler.getItemMeta();
+        fm.displayName(noItalic(mm.deserialize(config.getString("filler.name", " "))));
+        filler.setItemMeta(fm);
+        for (int i = 0; i < size; i++) inv.setItem(i, filler);
+    }
+
+    private void addCategoryItems(Inventory inv, ConfigurationSection menuSec) {
+        ConfigurationSection items = menuSec.getConfigurationSection("items");
+        if (items == null) return;
+        for (String key : items.getKeys(false)) {
+            ConfigurationSection item = items.getConfigurationSection(key);
+            if (item == null) continue;
+            Material mat = Material.matchMaterial(item.getString("material", "STONE"));
+            if (mat == null) continue;
+            ItemStack display = new ItemStack(mat);
+            ItemMeta meta = display.getItemMeta();
+            meta.displayName(noItalic(mm.deserialize(item.getString("name", key))));
+            List<Component> lore = new ArrayList<>();
+            for (String line : item.getStringList("lore")) {
+                lore.add(noItalic(mm.deserialize(line)));
+            }
+            meta.lore(lore);
+            display.setItemMeta(meta);
+            inv.setItem(item.getInt("slot", 0), display);
+        }
+    }
+
+    private void addShopItems(Inventory inv, ConfigurationSection menuSec, Player player) {
+        ConfigurationSection items = menuSec.getConfigurationSection("items");
+        if (items == null) return;
+        int coins = plugin.getCoinManager().getCoins(player.getUniqueId());
+        for (String key : items.getKeys(false)) {
+            ConfigurationSection sec = items.getConfigurationSection(key);
+            if (sec == null) continue;
+            Material mat = Material.matchMaterial(sec.getString("material", "STONE"));
+            if (mat == null) continue;
+            int price = sec.getInt("price", 0);
+            ItemStack display = new ItemStack(mat);
+            ItemMeta meta = display.getItemMeta();
+            meta.displayName(noItalic(mm.deserialize(sec.getString("name", key))));
+            List<Component> lore = new ArrayList<>();
+            for (String line : sec.getStringList("lore")) {
+                lore.add(noItalic(mm.deserialize(line
+                    .replace("{price}", String.valueOf(price))
+                    .replace("{duration}", sec.getString("duration", "0")))));
+            }
+            if (coins >= price) {
+                lore.add(noItalic(mm.deserialize("")));
+                lore.add(noItalic(mm.deserialize("<green>ʏᴏᴜ ᴄᴀɴ ᴀғғᴏʀᴅ ᴛʜɪs</green>")));
+            } else {
+                lore.add(noItalic(mm.deserialize("")));
+                lore.add(noItalic(mm.deserialize("<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs</red> <dark_gray>(" + coins + "/" + price + ")</dark_gray>")));
+            }
+            meta.lore(lore);
+            display.setItemMeta(meta);
+            inv.setItem(sec.getInt("slot", 0), display);
+        }
+    }
+
+    private void addBackButton(Inventory inv, int size) {
+        Material mat = Material.matchMaterial(config.getString("back-button.material", "ARROW"));
+        if (mat == null) mat = Material.ARROW;
+        int slot = config.getInt("back-button.slot", size - 5);
+        ItemStack back = new ItemStack(mat);
+        ItemMeta meta = back.getItemMeta();
+        meta.displayName(noItalic(mm.deserialize(config.getString("back-button.name", "<gray>← Back</gray>"))));
+        back.setItemMeta(meta);
+        inv.setItem(slot, back);
+    }
+
+    private ShopItem getShopItemAt(String menuKey, int slot) {
+        ConfigurationSection items = config.getConfigurationSection(menuKey + ".items");
+        if (items == null) return null;
+        for (String key : items.getKeys(false)) {
+            ConfigurationSection sec = items.getConfigurationSection(key);
+            if (sec == null || sec.getInt("slot", -1) != slot) continue;
+
+            ShopItem item = new ShopItem();
+            item.key = key;
+            item.material = Material.matchMaterial(sec.getString("material", "STONE"));
+            item.name = sec.getString("name", key);
+            item.rawName = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
+                .serialize(mm.deserialize(item.name));
+            item.price = sec.getInt("price", 0);
+            item.type = sec.getString("type", "items");
+            item.multiBuy = sec.getBoolean("multi-buy", false);
+            if ("effect".equals(item.type)) {
+                item.effectType = PotionEffectType.getByName(sec.getString("effect", "STRENGTH"));
+                item.amplifier = sec.getInt("amplifier", 0);
+                item.duration = sec.getInt("duration", 300);
+            } else if ("items".equals(item.type)) {
+                item.giveItems = new ArrayList<>();
+                for (String entry : sec.getStringList("items")) {
+                    String[] parts = entry.split(":");
+                    Material m = Material.matchMaterial(parts[0]);
+                    int amount = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+                    if (m != null) item.giveItems.add(new ItemStack(m, amount));
+                }
+            }
+            return item;
+        }
+        return null;
+    }
+
+    private Component noItalic(Component c) {
+        return c.decoration(TextDecoration.ITALIC, false);
+    }
 
     public static class ShopItem {
         public String key;
         public Material material;
         public String name;
-        public List<String> lore;
-        public int slot;
+        public String rawName;
         public int price;
         public String type;
         public PotionEffectType effectType;
         public int amplifier;
         public int duration;
         public List<ItemStack> giveItems;
+        public boolean multiBuy;
     }
 }
