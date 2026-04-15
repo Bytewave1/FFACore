@@ -137,6 +137,26 @@ public class KitManager {
     // ====== GIVE KIT ======
 
     public void giveKit(Player player) {
+        applyKit(player);
+        // Verify kit was applied after 5 ticks, re-apply if empty (Folia timing issues)
+        player.getScheduler().runDelayed(plugin, t -> {
+            if (!player.isOnline() || player.isDead()) return;
+            if (player.getInventory().isEmpty()) {
+                plugin.getLogger().info("Kit re-apply for " + player.getName() + " (inventory was empty)");
+                applyKit(player);
+            }
+        }, null, 5L);
+        // Final safety net at 15 ticks
+        player.getScheduler().runDelayed(plugin, t -> {
+            if (!player.isOnline() || player.isDead()) return;
+            if (player.getInventory().isEmpty()) {
+                plugin.getLogger().info("Kit final re-apply for " + player.getName());
+                applyKit(player);
+            }
+        }, null, 15L);
+    }
+
+    private void applyKit(Player player) {
         YamlConfiguration data;
 
         // Check for player-specific kit first
@@ -151,6 +171,7 @@ public class KitManager {
 
         player.getInventory().clear();
         player.getInventory().setArmorContents(new ItemStack[4]);
+        player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
 
         // Contents
         if (data.contains("contents")) {
@@ -190,6 +211,7 @@ public class KitManager {
         player.setSaturation(20f);
         player.setFireTicks(0);
         player.getActivePotionEffects().forEach(e -> player.removePotionEffect(e.getType()));
+        player.updateInventory();
     }
 
     // ====== HELPERS ======

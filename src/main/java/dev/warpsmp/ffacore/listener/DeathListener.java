@@ -84,8 +84,8 @@ public class DeathListener implements Listener {
             }
         }, null, 1L);
 
-        // Teleport to spawn after respawn (multiple attempts to be safe)
-        for (int delay : new int[]{3, 5, 10}) {
+        // Teleport + kit after respawn (multiple attempts for reliability)
+        for (int delay : new int[]{3, 8, 15, 25}) {
             victim.getScheduler().runDelayed(plugin, task -> {
                 if (!victim.isOnline() || victim.isDead()) return;
                 if (!PENDING_RESPAWN.contains(victim.getUniqueId())) return;
@@ -93,7 +93,9 @@ public class DeathListener implements Listener {
                 if (plugin.getSpawnManager().hasSpawn()) {
                     victim.teleportAsync(plugin.getSpawnManager().getSpawn()).thenAccept(success -> {
                         if (success && PENDING_RESPAWN.remove(victim.getUniqueId())) {
-                            victim.getScheduler().run(plugin, t -> {
+                            // Give kit with delay after teleport
+                            victim.getScheduler().runDelayed(plugin, t -> {
+                                if (!victim.isOnline()) return;
                                 if (plugin.getKitManager().hasKit()) {
                                     plugin.getKitManager().giveKit(victim);
                                 }
@@ -102,13 +104,14 @@ public class DeathListener implements Listener {
                                     plugin.getMessageManager().get("respawn-subtitle"),
                                     Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
                                 ));
-                            }, null);
+                            }, null, 3L);
                         }
                     });
                 } else {
-                    PENDING_RESPAWN.remove(victim.getUniqueId());
-                    if (plugin.getKitManager().hasKit()) {
-                        plugin.getKitManager().giveKit(victim);
+                    if (PENDING_RESPAWN.remove(victim.getUniqueId())) {
+                        if (plugin.getKitManager().hasKit()) {
+                            plugin.getKitManager().giveKit(victim);
+                        }
                     }
                 }
             }, null, (long) delay);
