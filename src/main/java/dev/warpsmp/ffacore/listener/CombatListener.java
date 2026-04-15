@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class CombatListener implements Listener {
 
@@ -16,7 +17,6 @@ public class CombatListener implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageByEntityEvent event) {
-        // Tag both players on hit
         Player attacker = null;
         Player victim = null;
 
@@ -30,6 +30,15 @@ public class CombatListener implements Listener {
         if (attacker != null && victim != null && !attacker.equals(victim)) {
             plugin.getCombatManager().tag(attacker);
             plugin.getCombatManager().tag(victim);
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (plugin.getCombatManager().isInCombat(player.getUniqueId())) {
+            player.setHealth(0);
+            plugin.getCombatManager().remove(player.getUniqueId());
         }
     }
 }
