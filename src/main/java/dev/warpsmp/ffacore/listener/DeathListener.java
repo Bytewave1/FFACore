@@ -38,7 +38,10 @@ public class DeathListener implements Listener {
         // Remove combat tag
         plugin.getCombatManager().remove(victim.getUniqueId());
 
-        // Reset victim killstreak
+        // Stats + reset victim killstreak
+        plugin.getStatsManager().addDeath(victim.getUniqueId(), victim.getName());
+        int streakBeforeDeath = plugin.getKillstreakManager().getStreak(victim.getUniqueId());
+        plugin.getStatsManager().checkHighestStreak(victim.getUniqueId(), streakBeforeDeath);
         plugin.getKillstreakManager().resetStreak(victim.getUniqueId());
 
         if (killer != null && !killer.equals(victim)) {
@@ -49,7 +52,8 @@ public class DeathListener implements Listener {
             plugin.getCoinManager().addCoins(killer.getUniqueId(), amount);
             plugin.getCoinManager().save();
 
-            // Killstreak
+            // Stats + killstreak
+            plugin.getStatsManager().addKill(killer.getUniqueId(), killer.getName());
             plugin.getKillstreakManager().addKill(killer);
 
             int total = plugin.getCoinManager().getCoins(killer.getUniqueId());

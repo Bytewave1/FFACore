@@ -1,3 +1,4 @@
+dev/warpsmp/ffacore/command/TopCommand.class
 dev/warpsmp/ffacore/manager/KillstreakManager.class
 dev/warpsmp/ffacore/manager/ShopManager$ShopItem.class
 dev/warpsmp/ffacore/placeholder/CoinsExpansion.class
@@ -21,8 +22,11 @@ dev/warpsmp/ffacore/command/SpawnCommand.class
 dev/warpsmp/ffacore/manager/CoinManager.class
 dev/warpsmp/ffacore/manager/KitManager.class
 dev/warpsmp/ffacore/command/ArenaResetCommand.class
+dev/warpsmp/ffacore/manager/StatsManager.class
 dev/warpsmp/ffacore/command/AdminSetSpawnCommand.class
 dev/warpsmp/ffacore/command/ShopCommand.class
+dev/warpsmp/ffacore/command/StatsCommand.class
+dev/warpsmp/ffacore/manager/StatsManager$PlayerStats.class
 dev/warpsmp/ffacore/manager/ArenaManager.class
 dev/warpsmp/ffacore/listener/ShopClickListener.class
 dev/warpsmp/ffacore/listener/JoinListener.class

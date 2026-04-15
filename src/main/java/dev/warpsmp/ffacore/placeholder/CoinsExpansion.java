@@ -47,6 +47,25 @@ public class CoinsExpansion extends PlaceholderExpansion {
             return String.valueOf(coins);
         }
 
+        if (params.equalsIgnoreCase("kills")) {
+            return String.valueOf(plugin.getStatsManager().getStats(player.getUniqueId()).kills);
+        }
+        if (params.equalsIgnoreCase("deaths")) {
+            return String.valueOf(plugin.getStatsManager().getStats(player.getUniqueId()).deaths);
+        }
+        if (params.equalsIgnoreCase("kdr")) {
+            return String.format("%.2f", plugin.getStatsManager().getStats(player.getUniqueId()).getKDR());
+        }
+        if (params.equalsIgnoreCase("streak")) {
+            return String.valueOf(plugin.getKillstreakManager().getStreak(player.getUniqueId()));
+        }
+        if (params.equalsIgnoreCase("best_streak")) {
+            return String.valueOf(plugin.getStatsManager().getStats(player.getUniqueId()).highestStreak);
+        }
+        if (params.equalsIgnoreCase("rank")) {
+            return String.valueOf(plugin.getStatsManager().getRank(player.getUniqueId()));
+        }
+
         return null;
     }
 }

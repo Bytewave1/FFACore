@@ -18,6 +18,7 @@ public class FFACore extends JavaPlugin {
     private ArenaManager arenaManager;
     private EventManager eventManager;
     private KillstreakManager killstreakManager;
+    private StatsManager statsManager;
 
     @Override
     public void onEnable() {
@@ -36,6 +37,7 @@ public class FFACore extends JavaPlugin {
         arenaManager = new ArenaManager(this);
         eventManager = new EventManager(this);
         killstreakManager = new KillstreakManager(this);
+        statsManager = new StatsManager(this);
 
         getCommand("savekit").setExecutor(new SaveKitCommand(this));
         getCommand("shop").setExecutor(new ShopCommand(this));
@@ -49,6 +51,10 @@ public class FFACore extends JavaPlugin {
         EventCommand eventCmd = new EventCommand(this);
         getCommand("event").setExecutor(eventCmd);
         getCommand("event").setTabCompleter(eventCmd);
+        StatsCommand statsCmd = new StatsCommand(this);
+        getCommand("stats").setExecutor(statsCmd);
+        getCommand("stats").setTabCompleter(statsCmd);
+        getCommand("top").setExecutor(new TopCommand(this));
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new JoinListener(this), this);
@@ -68,6 +74,7 @@ public class FFACore extends JavaPlugin {
     @Override
     public void onDisable() {
         if (coinManager != null) coinManager.save();
+        if (statsManager != null) statsManager.save();
         getLogger().info("FFACore disabled!");
     }
 
@@ -81,4 +88,5 @@ public class FFACore extends JavaPlugin {
     public ArenaManager getArenaManager() { return arenaManager; }
     public EventManager getEventManager() { return eventManager; }
     public KillstreakManager getKillstreakManager() { return killstreakManager; }
+    public StatsManager getStatsManager() { return statsManager; }
 }

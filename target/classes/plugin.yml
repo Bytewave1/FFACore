@@ -29,6 +29,10 @@ commands:
   event:
     description: Start/stop events
     permission: ffacore.admin
+  stats:
+    description: View player stats
+  top:
+    description: View leaderboard
 
 permissions:
   ffacore.admin:
