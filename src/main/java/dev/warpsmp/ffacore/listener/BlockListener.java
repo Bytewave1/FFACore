@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -23,58 +24,58 @@ public class BlockListener implements Listener {
         this.plugin = plugin;
     }
 
-    // LOWEST: uncancel TNT placement that WorldGuard might have blocked
+    // === TNT PLACEMENT ===
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlaceLowest(BlockPlaceEvent event) {
         if (event.getBlock().getType() == Material.TNT) {
-            Location loc = event.getBlock().getLocation();
-            // Block TNT in no-tnt zones
-            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
+            if (plugin.getTntZoneManager().isTntBlocked(event.getBlock().getLocation())) {
                 event.setCancelled(true);
-                return;
+            } else {
+                event.setCancelled(false);
             }
-            // Force allow TNT everywhere else, override WorldGuard
-            event.setCancelled(false);
         }
     }
 
-    // MONITOR: final say — re-enforce TNT zone blocks, and handle instant ignite
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onPlaceMonitor(BlockPlaceEvent event) {
-        if (event.getBlock().getType() == Material.TNT) {
-            Location loc = event.getBlock().getLocation();
-            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
-                event.setCancelled(true);
-                return;
-            }
-            // Force allow
-            event.setCancelled(false);
+        if (event.getBlock().getType() != Material.TNT) return;
+        Location loc = event.getBlock().getLocation();
+
+        if (plugin.getTntZoneManager().isTntBlocked(loc)) {
+            event.setCancelled(true);
+            return;
         }
+
+        // Force allow + instant ignite
+        event.setCancelled(false);
+        event.getBlock().setType(Material.AIR);
+        loc.getWorld().spawn(loc.clone().add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
+            tnt.setFuseTicks(40);
+            tnt.setSource(event.getPlayer());
+        });
     }
+
+    // === BLOCK TRACKING ===
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlace(BlockPlaceEvent event) {
         if (event.isCancelled()) return;
-        Location loc = event.getBlock().getLocation();
-        plugin.getArenaManager().trackBlock(loc);
+        if (event.getBlock().getType() == Material.TNT) return; // handled in monitor
+        plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
+    }
 
-        // Instant TNT ignite
-        if (event.getBlock().getType() == Material.TNT) {
-            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
-                event.setCancelled(true);
-                return;
-            }
-            event.getBlock().setType(Material.AIR);
-            loc.getWorld().spawn(loc.clone().add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
-                tnt.setFuseTicks(40);
-                tnt.setSource(event.getPlayer());
-            });
+    // === TNT EXPLOSIONS — force allow, override WorldGuard ===
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onExplodeLowest(EntityExplodeEvent event) {
+        if (event.getEntity() instanceof TNTPrimed) {
+            event.setCancelled(false);
         }
     }
 
-    // Force allow TNT explosions — override WorldGuard
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onExplode(EntityExplodeEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onExplodeHighest(EntityExplodeEvent event) {
         if (event.getEntity() instanceof TNTPrimed) {
             event.setCancelled(false);
         }
@@ -86,6 +87,18 @@ public class BlockListener implements Listener {
             event.setCancelled(false);
         }
     }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onBlockExplodeLowest(BlockExplodeEvent event) {
+        event.setCancelled(false);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    public void onBlockExplodeMonitor(BlockExplodeEvent event) {
+        event.setCancelled(false);
+    }
+
+    // === WATER/LAVA TRACKING ===
 
     @EventHandler
     public void onBucket(PlayerBucketEmptyEvent event) {
