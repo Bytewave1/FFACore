@@ -3,19 +3,21 @@ package dev.warpsmp.ffacore.listener;
 import dev.warpsmp.ffacore.FFACore;
 import dev.warpsmp.ffacore.manager.MessageManager;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.time.Duration;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DeathListener implements Listener {
 
     private final FFACore plugin;
+    public static final Set<UUID> PENDING_RESPAWN = ConcurrentHashMap.newKeySet();
 
     public DeathListener(FFACore plugin) {
         this.plugin = plugin;
@@ -37,22 +39,18 @@ public class DeathListener implements Listener {
         plugin.getCombatManager().remove(victim.getUniqueId());
 
         if (killer != null && !killer.equals(victim)) {
-            // Award coins
             int amount = plugin.getConfig().getInt("coins-per-kill", 10);
             plugin.getCoinManager().addCoins(killer.getUniqueId(), amount);
             plugin.getCoinManager().save();
 
             int total = plugin.getCoinManager().getCoins(killer.getUniqueId());
 
-            // Send coin message to killer
             killer.sendMessage(plugin.getMessageManager().get("coin-earn",
                 MessageManager.of("amount", String.valueOf(amount), "coins", String.valueOf(total))));
 
-            // Broadcast kill message
             plugin.getServer().sendMessage(
                 plugin.getMessageManager().getRandomKillMessage(killer.getName(), victim.getName()));
 
-            // Death title to victim
             victim.showTitle(Title.title(
                 plugin.getMessageManager().get("death-title"),
                 plugin.getMessageManager().get("death-subtitle",
@@ -60,38 +58,46 @@ public class DeathListener implements Listener {
                 Title.Times.times(Duration.ZERO, Duration.ofSeconds(2), Duration.ofMillis(500))
             ));
         }
-    }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onRespawn(PlayerRespawnEvent event) {
-        if (plugin.getSpawnManager().hasSpawn()) {
-            event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
-        }
+        // Mark for respawn handling
+        PENDING_RESPAWN.add(victim.getUniqueId());
 
-        Player player = event.getPlayer();
-
-        // Force exact teleport after respawn — Minecraft scatters around world spawn, we override that
-        player.getScheduler().runDelayed(plugin, task -> {
-            if (!player.isOnline()) return;
-            if (plugin.getSpawnManager().hasSpawn()) {
-                player.teleportAsync(plugin.getSpawnManager().getSpawn());
+        // Force instant respawn via Folia scheduler
+        victim.getScheduler().runDelayed(plugin, task -> {
+            if (!victim.isOnline()) return;
+            if (victim.isDead()) {
+                victim.spigot().respawn();
             }
         }, null, 1L);
 
-        // Kit + title slightly after teleport
-        player.getScheduler().runDelayed(plugin, task -> {
-            if (!player.isOnline()) return;
-            if (plugin.getSpawnManager().hasSpawn()) {
-                player.teleportAsync(plugin.getSpawnManager().getSpawn());
-            }
-            if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
-                plugin.getKitManager().giveKit(player);
-                player.showTitle(Title.title(
-                    plugin.getMessageManager().get("respawn-title"),
-                    plugin.getMessageManager().get("respawn-subtitle"),
-                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
-                ));
-            }
-        }, null, 5L);
+        // Teleport to spawn after respawn (multiple attempts to be safe)
+        for (int delay : new int[]{3, 5, 10}) {
+            victim.getScheduler().runDelayed(plugin, task -> {
+                if (!victim.isOnline() || victim.isDead()) return;
+                if (!PENDING_RESPAWN.contains(victim.getUniqueId())) return;
+
+                if (plugin.getSpawnManager().hasSpawn()) {
+                    victim.teleportAsync(plugin.getSpawnManager().getSpawn()).thenAccept(success -> {
+                        if (success && PENDING_RESPAWN.remove(victim.getUniqueId())) {
+                            victim.getScheduler().run(plugin, t -> {
+                                if (plugin.getKitManager().hasKit()) {
+                                    plugin.getKitManager().giveKit(victim);
+                                }
+                                victim.showTitle(Title.title(
+                                    plugin.getMessageManager().get("respawn-title"),
+                                    plugin.getMessageManager().get("respawn-subtitle"),
+                                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
+                                ));
+                            }, null);
+                        }
+                    });
+                } else {
+                    PENDING_RESPAWN.remove(victim.getUniqueId());
+                    if (plugin.getKitManager().hasKit()) {
+                        plugin.getKitManager().giveKit(victim);
+                    }
+                }
+            }, null, (long) delay);
+        }
     }
 }
