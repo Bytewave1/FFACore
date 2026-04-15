@@ -23,7 +23,7 @@ public class SellCommand implements CommandExecutor {
     static {
         SELL_PRICES.put(Material.EMERALD, 5);
         SELL_PRICES.put(Material.RAW_GOLD, 2);
-        SELL_PRICES.put(Material.GOLD_INGOT, 3);
+        SELL_PRICES.put(Material.DIAMOND, 3);
     }
 
     public SellCommand(FFACore plugin) {
@@ -57,7 +57,7 @@ public class SellCommand implements CommandExecutor {
         if (totalItems == 0) {
             player.sendMessage(mm.deserialize(
                 plugin.getMessageManager().getRaw("prefix") +
-                "<red>ɴᴏᴛʜɪɴɢ ᴛᴏ sᴇʟʟ!</red> <dark_gray>(Emerald, Gold Ingot, Raw Gold)</dark_gray>"));
+                "<red>ɴᴏᴛʜɪɴɢ ᴛᴏ sᴇʟʟ!</red> <dark_gray>(Emerald, Diamond, Raw Gold)</dark_gray>"));
             return true;
         }
 
