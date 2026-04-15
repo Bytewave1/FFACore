@@ -64,11 +64,17 @@ public class ArenaManager {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     int eq = line.indexOf('=');
-                    if (eq > 0) keys.add(line.substring(0, eq));
+                    if (eq > 0) {
+                        String value = line.substring(eq + 1);
+                        // Only cache non-air blocks as protected
+                        if (!value.startsWith("minecraft:air") && !value.startsWith("minecraft:cave_air")) {
+                            keys.add(line.substring(0, eq));
+                        }
+                    }
                 }
             } catch (IOException ignored) {}
             snapshotCache.put(arena.name.toLowerCase(), keys);
-            plugin.getLogger().info("Loaded snapshot cache for " + arena.name + ": " + keys.size() + " blocks");
+            plugin.getLogger().info("Loaded snapshot cache for " + arena.name + ": " + keys.size() + " protected blocks");
         }
     }
 
@@ -116,9 +122,14 @@ public class ArenaManager {
                 }
             }
         }
-        // Update cache
-        snapshotCache.put(arena.name.toLowerCase(), ConcurrentHashMap.newKeySet(blocks.size()));
-        snapshotCache.get(arena.name.toLowerCase()).addAll(blocks.keySet());
+        // Update cache — only non-air blocks are "original"
+        Set<String> nonAirKeys = ConcurrentHashMap.newKeySet();
+        for (Map.Entry<String, String> entry : blocks.entrySet()) {
+            if (!entry.getValue().startsWith("minecraft:air") && !entry.getValue().startsWith("minecraft:cave_air")) {
+                nonAirKeys.add(entry.getKey());
+            }
+        }
+        snapshotCache.put(arena.name.toLowerCase(), nonAirKeys);
 
         // Write to file async (plain text, not YAML — much faster)
         int count = blocks.size();
