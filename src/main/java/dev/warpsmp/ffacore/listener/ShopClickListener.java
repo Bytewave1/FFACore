@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
 public class ShopClickListener implements Listener {
@@ -19,15 +20,12 @@ public class ShopClickListener implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (event.getView().title() == null) return;
 
-        String menuId = plugin.getShopManager().getMenuId(event.getView().title());
+        String menuId = plugin.getShopManager().getMenuId(player.getUniqueId());
         if (menuId == null) return;
 
-        // Cancel ALL clicks in shop menus — no item moving
         event.setCancelled(true);
 
-        // Ignore clicks in player inventory
         if (event.getClickedInventory() != event.getView().getTopInventory()) return;
 
         int slot = event.getRawSlot();
@@ -40,14 +38,17 @@ public class ShopClickListener implements Listener {
         }
     }
 
-    // Block dragging items in shop
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
-        if (event.getView().title() == null) return;
-        String menuId = plugin.getShopManager().getMenuId(event.getView().title());
-        if (menuId != null) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (plugin.getShopManager().getMenuId(player.getUniqueId()) != null) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) return;
+        plugin.getShopManager().removePlayer(player.getUniqueId());
     }
 }

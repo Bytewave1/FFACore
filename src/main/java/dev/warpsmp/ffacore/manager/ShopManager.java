@@ -30,8 +30,9 @@ public class ShopManager {
     public static final String CRYSTALS_ID = "ffashop:crystals";
     public static final String AMOUNT_ID = "ffashop:amount";
 
-    // Per-player pending multi-buy
+    // Per-player state
     private final Map<UUID, ShopItem> pendingMultiBuy = new HashMap<>();
+    private final Map<UUID, String> openMenus = new HashMap<>();
 
     public ShopManager(FFACore plugin) {
         this.plugin = plugin;
@@ -51,6 +52,7 @@ public class ShopManager {
         fillEmpty(inv, sec.getInt("size", 27));
         addCategoryItems(inv, sec);
         player.openInventory(inv);
+        openMenus.put(player.getUniqueId(), MAIN_ID);
     }
 
     public void openEffectsMenu(Player player) {
@@ -61,6 +63,7 @@ public class ShopManager {
         addShopItems(inv, sec, player);
         addBackButton(inv, sec.getInt("size", 27));
         player.openInventory(inv);
+        openMenus.put(player.getUniqueId(), EFFECTS_ID);
     }
 
     public void openCrystalsMenu(Player player) {
@@ -71,6 +74,7 @@ public class ShopManager {
         addShopItems(inv, sec, player);
         addBackButton(inv, sec.getInt("size", 27));
         player.openInventory(inv);
+        openMenus.put(player.getUniqueId(), CRYSTALS_ID);
     }
 
     public void openAmountMenu(Player player, ShopItem item) {
@@ -112,17 +116,16 @@ public class ShopManager {
 
         addBackButton(inv, size);
         player.openInventory(inv);
+        openMenus.put(player.getUniqueId(), AMOUNT_ID);
     }
 
-    // ====== MENU IDENTIFICATION ======
+    public String getMenuId(UUID uuid) {
+        return openMenus.get(uuid);
+    }
 
-    public String getMenuId(Component title) {
-        String plain = MiniMessage.miniMessage().serialize(title);
-        if (plain.contains(MAIN_ID)) return MAIN_ID;
-        if (plain.contains(EFFECTS_ID)) return EFFECTS_ID;
-        if (plain.contains(CRYSTALS_ID)) return CRYSTALS_ID;
-        if (plain.contains(AMOUNT_ID)) return AMOUNT_ID;
-        return null;
+    public void removePlayer(UUID uuid) {
+        openMenus.remove(uuid);
+        pendingMultiBuy.remove(uuid);
     }
 
     // ====== CLICK HANDLING ======
@@ -226,7 +229,7 @@ public class ShopManager {
     private Inventory createMenu(ConfigurationSection sec, String id) {
         int size = sec.getInt("size", 27);
         String title = sec.getString("title", "Shop");
-        return Bukkit.createInventory(null, size, mm.deserialize(title + "<!--" + id + "-->"));
+        return Bukkit.createInventory(null, size, mm.deserialize(title));
     }
 
     private void fillEmpty(Inventory inv, int size) {
