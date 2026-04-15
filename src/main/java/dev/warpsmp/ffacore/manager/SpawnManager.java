@@ -13,8 +13,9 @@ public class SpawnManager {
 
     private final FFACore plugin;
     private final File file;
-    private final YamlConfiguration data;
+    private YamlConfiguration data;
     private Location spawn;
+    private boolean loaded = false;
 
     public SpawnManager(FFACore plugin) {
         this.plugin = plugin;
@@ -23,11 +24,10 @@ public class SpawnManager {
             try { file.createNewFile(); } catch (IOException ignored) {}
         }
         this.data = YamlConfiguration.loadConfiguration(file);
-        load();
     }
 
-    private void load() {
-        if (!data.contains("world")) return;
+    private void tryLoad() {
+        if (loaded || !data.contains("world")) return;
         World world = Bukkit.getWorld(data.getString("world"));
         if (world == null) return;
         spawn = new Location(world,
@@ -36,10 +36,14 @@ public class SpawnManager {
             data.getDouble("z"),
             (float) data.getDouble("yaw"),
             (float) data.getDouble("pitch"));
+        loaded = true;
+        plugin.getLogger().info("Spawn loaded: " + spawn.getWorld().getName() +
+            " " + spawn.getBlockX() + " " + spawn.getBlockY() + " " + spawn.getBlockZ());
     }
 
     public void setSpawn(Location loc) {
         this.spawn = loc;
+        this.loaded = true;
         data.set("world", loc.getWorld().getName());
         data.set("x", loc.getX());
         data.set("y", loc.getY());
@@ -54,10 +58,12 @@ public class SpawnManager {
     }
 
     public Location getSpawn() {
+        tryLoad();
         return spawn;
     }
 
     public boolean hasSpawn() {
+        tryLoad();
         return spawn != null;
     }
 }

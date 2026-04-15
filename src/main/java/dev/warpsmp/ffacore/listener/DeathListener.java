@@ -3,6 +3,7 @@ package dev.warpsmp.ffacore.listener;
 import dev.warpsmp.ffacore.FFACore;
 import dev.warpsmp.ffacore.manager.MessageManager;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,6 +33,9 @@ public class DeathListener implements Listener {
         // Suppress default death message
         event.deathMessage(null);
 
+        // Remove combat tag
+        plugin.getCombatManager().remove(victim.getUniqueId());
+
         if (killer != null && !killer.equals(victim)) {
             // Award coins
             int amount = plugin.getConfig().getInt("coins-per-kill", 10);
@@ -58,28 +62,27 @@ public class DeathListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
 
-        // Set respawn location to spawn
+        // ALWAYS set respawn to spawn
         if (plugin.getSpawnManager().hasSpawn()) {
-            event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
+            Location spawn = plugin.getSpawnManager().getSpawn();
+            event.setRespawnLocation(spawn);
         }
 
-        // Remove combat tag on death
-        plugin.getCombatManager().remove(player.getUniqueId());
-
-        if (!plugin.getConfig().getBoolean("kit-on-respawn", true)) return;
-
-        // Folia-compatible: use entity scheduler
-        player.getScheduler().run(plugin, task -> {
-            plugin.getKitManager().giveKit(player);
-            player.showTitle(Title.title(
-                plugin.getMessageManager().get("respawn-title"),
-                plugin.getMessageManager().get("respawn-subtitle"),
-                Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
-            ));
-        }, null);
+        // Give kit after respawn
+        if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
+            player.getScheduler().runDelayed(plugin, task -> {
+                if (!player.isOnline()) return;
+                plugin.getKitManager().giveKit(player);
+                player.showTitle(Title.title(
+                    plugin.getMessageManager().get("respawn-title"),
+                    plugin.getMessageManager().get("respawn-subtitle"),
+                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
+                ));
+            }, null, 3L);
+        }
     }
 }
