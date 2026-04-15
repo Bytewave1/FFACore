@@ -66,23 +66,30 @@ public class DeathListener implements Listener {
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
 
-        // ALWAYS set respawn to spawn
+        // Set respawn location
         if (plugin.getSpawnManager().hasSpawn()) {
-            Location spawn = plugin.getSpawnManager().getSpawn();
-            event.setRespawnLocation(spawn);
+            event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
         }
 
-        // Give kit after respawn
-        if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
-            player.getScheduler().runDelayed(plugin, task -> {
-                if (!player.isOnline()) return;
-                plugin.getKitManager().giveKit(player);
-                player.showTitle(Title.title(
-                    plugin.getMessageManager().get("respawn-title"),
-                    plugin.getMessageManager().get("respawn-subtitle"),
-                    Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
-                ));
-            }, null, 3L);
-        }
+        // Force teleport + kit after respawn (backup in case setRespawnLocation doesn't work on Folia)
+        player.getScheduler().runDelayed(plugin, task -> {
+            if (!player.isOnline()) return;
+
+            if (plugin.getSpawnManager().hasSpawn()) {
+                player.teleportAsync(plugin.getSpawnManager().getSpawn());
+            }
+
+            if (plugin.getConfig().getBoolean("kit-on-respawn", true) && plugin.getKitManager().hasKit()) {
+                player.getScheduler().runDelayed(plugin, t -> {
+                    if (!player.isOnline()) return;
+                    plugin.getKitManager().giveKit(player);
+                    player.showTitle(Title.title(
+                        plugin.getMessageManager().get("respawn-title"),
+                        plugin.getMessageManager().get("respawn-subtitle"),
+                        Title.Times.times(Duration.ZERO, Duration.ofSeconds(1), Duration.ofMillis(500))
+                    ));
+                }, null, 5L);
+            }
+        }, null, 2L);
     }
 }
