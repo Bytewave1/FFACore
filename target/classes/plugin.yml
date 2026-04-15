@@ -1,0 +1,25 @@
+name: FFACore
+version: 1.0.0
+main: dev.warpsmp.ffacore.FFACore
+api-version: '1.21'
+folia-supported: true
+description: FFA Core Plugin for WarpSMP
+authors: [Bytewave1]
+softdepend: [PlaceholderAPI]
+
+commands:
+  savekit:
+    description: Save your current inventory as the FFA kit
+    permission: ffacore.admin
+  shop:
+    description: Open the FFA shop
+  coins:
+    description: Check your coins
+  setcoins:
+    description: Set a player's coins
+    permission: ffacore.admin
+
+permissions:
+  ffacore.admin:
+    description: FFA Core admin permissions
+    default: op

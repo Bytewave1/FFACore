@@ -1,0 +1,16 @@
+# FFACore Configuration
+
+# Coins awarded per kill
+coins-per-kill: 10
+
+# Auto-equip kit on join
+kit-on-join: true
+
+# Auto-equip kit on death (respawn)
+kit-on-respawn: true
+
+# Clear inventory before giving kit
+clear-before-kit: true
+
+# Respawn delay in ticks (20 = 1 second)
+respawn-delay: 1

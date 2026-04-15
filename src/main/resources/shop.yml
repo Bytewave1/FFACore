@@ -1,0 +1,92 @@
+# FFACore Shop Configuration
+# Each item in the shop is a section with:
+#   material: The display material in the GUI
+#   name: Display name (MiniMessage)
+#   lore: Lore lines (MiniMessage), use {price} and {duration}
+#   slot: GUI slot (0-53)
+#   price: Cost in coins
+#   type: "effect" or "items"
+#
+# For type "effect":
+#   effect: Potion effect type (STRENGTH, SPEED, REGENERATION, etc.)
+#   amplifier: Effect level (0 = I, 1 = II, 2 = III)
+#   duration: Duration in seconds
+#
+# For type "items":
+#   items: List of items to give (material:amount)
+
+title: "<gradient:#00ff88:#00cc66><bold>ғғᴀ sʜᴏᴘ</bold></gradient>"
+size: 27
+
+items:
+  strength:
+    material: BLAZE_POWDER
+    name: "<gradient:#ff4444:#ff8888><bold>sᴛʀᴇɴɢᴛʜ ɪɪ</bold></gradient>"
+    lore:
+      - ""
+      - "<gray>Grants <red>Strength II</red> for <white>{duration}s</white></gray>"
+      - ""
+      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+      - ""
+      - "<yellow>Click to purchase!</yellow>"
+    slot: 10
+    price: 100
+    type: effect
+    effect: STRENGTH
+    amplifier: 1
+    duration: 300
+
+  speed:
+    material: SUGAR
+    name: "<gradient:#55ffff:#55aaff><bold>sᴘᴇᴇᴅ ɪɪ</bold></gradient>"
+    lore:
+      - ""
+      - "<gray>Grants <aqua>Speed II</aqua> for <white>{duration}s</white></gray>"
+      - ""
+      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+      - ""
+      - "<yellow>Click to purchase!</yellow>"
+    slot: 12
+    price: 75
+    type: effect
+    effect: SPEED
+    amplifier: 1
+    duration: 300
+
+  regeneration:
+    material: GHAST_TEAR
+    name: "<gradient:#ff55ff:#ffaaff><bold>ʀᴇɢᴇɴ ɪɪ</bold></gradient>"
+    lore:
+      - ""
+      - "<gray>Grants <light_purple>Regen II</light_purple> for <white>{duration}s</white></gray>"
+      - ""
+      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+      - ""
+      - "<yellow>Click to purchase!</yellow>"
+    slot: 14
+    price: 150
+    type: effect
+    effect: REGENERATION
+    amplifier: 1
+    duration: 180
+
+  golden-apples:
+    material: GOLDEN_APPLE
+    name: "<gradient:#ffaa00:#ffdd00><bold>ɢᴏʟᴅᴇɴ ᴀᴘᴘʟᴇs</bold></gradient>"
+    lore:
+      - ""
+      - "<gray>Receive <gold>3x Golden Apples</gold></gray>"
+      - ""
+      - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+      - ""
+      - "<yellow>Click to purchase!</yellow>"
+    slot: 16
+    price: 50
+    type: items
+    items:
+      - "GOLDEN_APPLE:3"
+
+# Filler item for empty slots
+filler:
+  material: GRAY_STAINED_GLASS_PANE
+  name: " "

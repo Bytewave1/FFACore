@@ -1,0 +1,39 @@
+# FFACore Messages (MiniMessage format)
+# Placeholders: {player}, {killer}, {victim}, {coins}, {amount}, {item}, {price}, {duration}
+
+prefix: "<gradient:#00ff88:#00cc66><bold>ғғᴀ</bold></gradient> <dark_gray>| </dark_gray>"
+
+# Kill messages (random pick)
+kill-messages:
+  - "{prefix}<white>{killer}</white> <gray>has eliminated</gray> <white>{victim}</white>"
+  - "{prefix}<white>{killer}</white> <gray>destroyed</gray> <white>{victim}</white>"
+  - "{prefix}<white>{victim}</white> <gray>was slain by</gray> <white>{killer}</white>"
+  - "{prefix}<white>{killer}</white> <gray>sent</gray> <white>{victim}</white> <gray>back to spawn</gray>"
+
+# Coin messages
+coin-earn: "{prefix}<green>+{amount} ᴄᴏɪɴs</green> <dark_gray>({coins} total)</dark_gray>"
+coin-balance: "{prefix}<gray>ʙᴀʟᴀɴᴄᴇ:</gray> <green><bold>{coins}</bold></green> <gray>ᴄᴏɪɴs</gray>"
+coin-set: "{prefix}<gray>Set</gray> <white>{player}</white> <gray>coins to</gray> <green>{coins}</green>"
+coin-not-enough: "{prefix}<red>ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴs!</red> <dark_gray>(need {price})</dark_gray>"
+
+# Kit messages
+kit-saved: "{prefix}<green>ᴋɪᴛ sᴀᴠᴇᴅ!</green> <dark_gray>({amount} items)</dark_gray>"
+kit-given: "{prefix}<gray>ᴋɪᴛ ᴇǫᴜɪᴘᴘᴇᴅ</gray>"
+kit-empty: "{prefix}<red>No kit saved yet! Use /savekit first.</red>"
+
+# Shop messages
+shop-title: "<gradient:#00ff88:#00cc66><bold>ғғᴀ sʜᴏᴘ</bold></gradient>"
+shop-purchased: "{prefix}<green>ᴘᴜʀᴄʜᴀsᴇᴅ</green> <white>{item}</white> <dark_gray>(-{price} ᴄᴏɪɴs)</dark_gray>"
+shop-active: "{prefix}<yellow>{item}</yellow> <gray>is already active!</gray>"
+
+# Death/respawn
+death-title: "<red><bold>ᴅᴇᴀᴅ</bold></red>"
+death-subtitle: "<gray>killed by</gray> <white>{killer}</white>"
+respawn-title: "<gradient:#00ff88:#00cc66><bold>ʀᴇsᴘᴀᴡɴᴇᴅ</bold></gradient>"
+respawn-subtitle: "<gray>ɢᴏᴏᴅ ʟᴜᴄᴋ</gray>"
+
+# General
+no-permission: "{prefix}<red>ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ</red>"
+player-only: "{prefix}<red>Only players can use this.</red>"
+player-not-found: "{prefix}<red>Player not found.</red>"
+usage-setcoins: "{prefix}<gray>Usage: /setcoins <player> <amount></gray>"
