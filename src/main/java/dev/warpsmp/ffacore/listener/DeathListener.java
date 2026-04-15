@@ -28,8 +28,7 @@ public class DeathListener implements Listener {
         Player victim = event.getEntity();
         Player killer = victim.getKiller();
 
-        // Clear drops
-        event.getDrops().clear();
+        // Keep drops for killer to loot
         event.setDroppedExp(0);
 
         // Suppress default death message
