@@ -41,6 +41,10 @@ public class MessageManager {
         return get(key, null);
     }
 
+    public String getRaw(String key) {
+        return config.getString(key, key).replace("{prefix}", prefix);
+    }
+
     public Component getRandomKillMessage(String killer, String victim) {
         List<String> messages = config.getStringList("kill-messages");
         if (messages.isEmpty()) return Component.text(killer + " killed " + victim);

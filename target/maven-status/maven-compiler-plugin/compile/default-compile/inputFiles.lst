@@ -2,12 +2,16 @@
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/DeathListener.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SaveKitCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/FFACore.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/CombatListener.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/SetCoinsCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/placeholder/CoinsExpansion.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/ShopCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/MessageManager.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/SpawnManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/ShopManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/ShopClickListener.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/listener/JoinListener.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/CombatManager.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/manager/KitManager.java
+/home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/AdminSetSpawnCommand.java
 /home/mattis/FFACore/src/main/java/dev/warpsmp/ffacore/command/CoinsCommand.java

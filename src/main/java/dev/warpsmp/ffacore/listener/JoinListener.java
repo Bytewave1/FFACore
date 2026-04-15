@@ -23,6 +23,10 @@ public class JoinListener implements Listener {
 
         // Folia-compatible: use entity scheduler with slight delay
         player.getScheduler().runDelayed(plugin, task -> {
+            // Teleport to spawn
+            if (plugin.getSpawnManager().hasSpawn()) {
+                player.teleportAsync(plugin.getSpawnManager().getSpawn());
+            }
             plugin.getKitManager().giveKit(player);
             player.sendMessage(plugin.getMessageManager().get("kit-given"));
         }, null, 5L);

@@ -37,3 +37,10 @@ no-permission: "{prefix}<red>ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ</red>"
 player-only: "{prefix}<red>Only players can use this.</red>"
 player-not-found: "{prefix}<red>Player not found.</red>"
 usage-setcoins: "{prefix}<gray>Usage: /setcoins <player> <amount></gray>"
+
+# Combat tag
+combat-tag: "<gradient:#ff4444:#ff8888><bold>ɪɴ ᴄᴏᴍʙᴀᴛ</bold></gradient> <white>{time}s</white>"
+combat-end: "<green><bold>ᴄᴏᴍʙᴀᴛ ᴇɴᴅᴇᴅ</bold></green>"
+
+# Spawn
+spawn-set: "{prefix}<green>sᴘᴀᴡɴ sᴇᴛ!</green> <dark_gray>(at your location)</dark_gray>"

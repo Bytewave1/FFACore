@@ -60,10 +60,17 @@ public class DeathListener implements Listener {
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
-        if (!plugin.getConfig().getBoolean("kit-on-respawn", true)) return;
-
         Player player = event.getPlayer();
-        int delay = plugin.getConfig().getInt("respawn-delay", 1);
+
+        // Set respawn location to spawn
+        if (plugin.getSpawnManager().hasSpawn()) {
+            event.setRespawnLocation(plugin.getSpawnManager().getSpawn());
+        }
+
+        // Remove combat tag on death
+        plugin.getCombatManager().remove(player.getUniqueId());
+
+        if (!plugin.getConfig().getBoolean("kit-on-respawn", true)) return;
 
         // Folia-compatible: use entity scheduler
         player.getScheduler().run(plugin, task -> {

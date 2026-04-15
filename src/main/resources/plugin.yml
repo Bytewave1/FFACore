@@ -18,6 +18,9 @@ commands:
   setcoins:
     description: Set a player's coins
     permission: ffacore.admin
+  adminsetspawn:
+    description: Set the FFA spawn point
+    permission: ffacore.admin
 
 permissions:
   ffacore.admin:
