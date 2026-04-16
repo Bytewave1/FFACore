@@ -18,8 +18,12 @@ public class CombatListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onDamage(EntityDamageByEntityEvent event) {
+        // Only tag if damage actually went through (not cancelled by WorldGuard/spawn protection)
+        if (event.isCancelled()) return;
+        if (event.getFinalDamage() <= 0) return;
+
         Player attacker = null;
         Player victim = null;
 
@@ -27,11 +31,7 @@ public class CombatListener implements Listener {
         if (event.getEntity() instanceof Player p) victim = p;
 
         if (attacker != null && victim != null && !attacker.equals(victim)) {
-            // If either player is near spawn, cancel damage entirely
-            if (isNearSpawn(attacker) || isNearSpawn(victim)) {
-                event.setCancelled(true);
-                return;
-            }
+            if (isNearSpawn(attacker) || isNearSpawn(victim)) return;
             plugin.getCombatManager().tag(attacker);
             plugin.getCombatManager().tag(victim);
         }

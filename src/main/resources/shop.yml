@@ -16,14 +16,14 @@ main-menu:
         - "<gray>to gain an advantage!</gray>"
         - ""
         - "<yellow>Click to browse!</yellow>"
-    crystals:
+    fighting:
       slot: 13
       material: END_CRYSTAL
-      name: "<gradient:#aa55ff:#ff55ff><bold>ᴄʀʏsᴛᴀʟs & ᴏʙsɪᴅɪᴀɴ</bold></gradient>"
+      name: "<gradient:#aa55ff:#ff55ff><bold>ғɪɢʜᴛɪɴɢ sᴛᴜғғ</bold></gradient>"
       lore:
         - ""
-        - "<gray>Buy End Crystals and</gray>"
-        - "<gray>Obsidian for combat!</gray>"
+        - "<gray>Crystals, Obsidian,</gray>"
+        - "<gray>Wind Charges & more!</gray>"
         - ""
         - "<yellow>Click to browse!</yellow>"
     coming-soon:
@@ -104,13 +104,13 @@ effects-menu:
       items:
         - "GOLDEN_APPLE:3"
 
-# Crystals category
-crystals-menu:
-  title: "<gradient:#aa55ff:#ff55ff><bold>ᴄʀʏsᴛᴀʟs & ᴏʙsɪᴅɪᴀɴ</bold></gradient>"
+# Fighting stuff category
+fighting-menu:
+  title: "<gradient:#aa55ff:#ff55ff><bold>ғɪɢʜᴛɪɴɢ sᴛᴜғғ</bold></gradient>"
   size: 27
   items:
     crystal:
-      slot: 11
+      slot: 10
       material: END_CRYSTAL
       name: "<gradient:#aa55ff:#ff55ff><bold>ᴇɴᴅ ᴄʀʏsᴛᴀʟ</bold></gradient>"
       lore:
@@ -126,7 +126,7 @@ crystals-menu:
         - "END_CRYSTAL:1"
       multi-buy: true
     obsidian:
-      slot: 15
+      slot: 13
       material: OBSIDIAN
       name: "<gradient:#333333:#555555><bold>ᴏʙsɪᴅɪᴀɴ</bold></gradient>"
       lore:
@@ -140,6 +140,22 @@ crystals-menu:
       type: items
       items:
         - "OBSIDIAN:1"
+      multi-buy: true
+    windcharge:
+      slot: 16
+      material: WIND_CHARGE
+      name: "<gradient:#55ffff:#aaffff><bold>ᴡɪɴᴅ ᴄʜᴀʀɢᴇ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase Wind Charges</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green> each</dark_gray>"
+        - ""
+        - "<yellow>Click to select amount!</yellow>"
+      price: 15
+      type: items
+      items:
+        - "WIND_CHARGE:1"
       multi-buy: true
 
 # Amount selection menu for multi-buy items

@@ -27,7 +27,7 @@ public class ShopManager {
     // Menu identifiers stored in inventory title
     public static final String MAIN_ID = "ffashop:main";
     public static final String EFFECTS_ID = "ffashop:effects";
-    public static final String CRYSTALS_ID = "ffashop:crystals";
+    public static final String CRYSTALS_ID = "ffashop:fighting";
     public static final String AMOUNT_ID = "ffashop:amount";
 
     // Per-player state
@@ -66,8 +66,8 @@ public class ShopManager {
         openMenus.put(player.getUniqueId(), EFFECTS_ID);
     }
 
-    public void openCrystalsMenu(Player player) {
-        ConfigurationSection sec = config.getConfigurationSection("crystals-menu");
+    public void openFightingMenu(Player player) {
+        ConfigurationSection sec = config.getConfigurationSection("fighting-menu");
         if (sec == null) return;
         Inventory inv = createMenu(sec, CRYSTALS_ID);
         fillEmpty(inv, sec.getInt("size", 27));
@@ -140,14 +140,14 @@ public class ShopManager {
             if (itemSlot != slot) continue;
             switch (key) {
                 case "effects" -> openEffectsMenu(player);
-                case "crystals" -> openCrystalsMenu(player);
+                case "fighting" -> openFightingMenu(player);
                 // coming-soon does nothing
             }
         }
     }
 
     public void handleCategoryClick(Player player, int slot, String menuId) {
-        String menuKey = EFFECTS_ID.equals(menuId) ? "effects-menu" : "crystals-menu";
+        String menuKey = EFFECTS_ID.equals(menuId) ? "effects-menu" : "fighting-menu";
         ShopItem item = getShopItemAt(menuKey, slot);
         if (item == null) {
             // Check back button
@@ -185,7 +185,7 @@ public class ShopManager {
         int backSlot = config.getInt("back-button.slot", size - 5);
         if (slot == backSlot) {
             pendingMultiBuy.remove(player.getUniqueId());
-            openCrystalsMenu(player);
+            openFightingMenu(player);
             return;
         }
 
