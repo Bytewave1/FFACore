@@ -85,6 +85,9 @@ public class FFACore extends JavaPlugin {
             getLogger().info("PlaceholderAPI hook registered!");
         }
 
+        // Disable vanilla spawn protection
+        getServer().setSpawnRadius(0);
+        getLogger().info("Spawn protection radius set to 0");
         getLogger().info("FFACore enabled!");
     }
 

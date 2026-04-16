@@ -202,8 +202,17 @@ public class ArenaManager {
      * Compares every block with the snapshot and restores differences.
      */
     public int resetAllArenas() {
+        if (arenas.isEmpty()) {
+            plugin.getLogger().warning("No arenas defined! Use /arenareset create first.");
+            return 0;
+        }
         int totalRestored = 0;
         for (Arena arena : arenas.values()) {
+            File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
+            if (!snapFile.exists() || snapFile.length() == 0) {
+                plugin.getLogger().warning("No snapshot for arena '" + arena.name + "'! Use /arenareset create first.");
+                continue;
+            }
             totalRestored += resetArena(arena);
         }
         placedBlocks.clear();

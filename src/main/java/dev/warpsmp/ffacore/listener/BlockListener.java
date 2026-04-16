@@ -2,7 +2,6 @@ package dev.warpsmp.ffacore.listener;
 import dev.warpsmp.ffacore.util.Scheduler;
 
 import dev.warpsmp.ffacore.FFACore;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -10,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -24,67 +22,45 @@ public class BlockListener implements Listener {
         this.plugin = plugin;
     }
 
-    // === TNT PLACEMENT ===
-
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onPlaceLowest(BlockPlaceEvent event) {
-        if (event.getBlock().getType() == Material.TNT) {
-            if (plugin.getTntZoneManager().isTntBlocked(event.getBlock().getLocation())) {
-                event.setCancelled(true);
-            } else {
-                event.setCancelled(false);
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    public void onPlaceMonitor(BlockPlaceEvent event) {
-        if (event.getBlock().getType() != Material.TNT) return;
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onPlace(BlockPlaceEvent event) {
         Location loc = event.getBlock().getLocation();
 
-        if (plugin.getTntZoneManager().isTntBlocked(loc)) {
-            event.setCancelled(true);
+        // TNT handling
+        if (event.getBlock().getType() == Material.TNT) {
+            if (plugin.getTntZoneManager().isTntBlocked(loc)) {
+                event.setCancelled(true);
+                return;
+            }
+            // Force allow TNT
+            event.setCancelled(false);
+            event.getBlock().setType(Material.AIR);
+            loc.getWorld().spawn(loc.clone().add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
+                tnt.setFuseTicks(40);
+                tnt.setSource(event.getPlayer());
+            });
             return;
         }
 
-        // Force allow + instant ignite
-        event.setCancelled(false);
-        event.getBlock().setType(Material.AIR);
-        loc.getWorld().spawn(loc.clone().add(0.5, 0.5, 0.5), TNTPrimed.class, tnt -> {
-            tnt.setFuseTicks(40);
-            tnt.setSource(event.getPlayer());
-        });
+        // Track non-TNT blocks for arena reset
+        if (!event.isCancelled()) {
+            plugin.getArenaManager().trackBlock(loc);
+        }
     }
 
-    // === BLOCK TRACKING ===
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlace(BlockPlaceEvent event) {
-        if (event.isCancelled()) return;
-        if (event.getBlock().getType() == Material.TNT) return; // handled in monitor
-        plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
-    }
-
-    // === TNT EXPLOSIONS — use world.createExplosion to bypass WorldGuard ===
-
+    // Force TNT explosions
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onExplode(EntityExplodeEvent event) {
         if (!(event.getEntity() instanceof TNTPrimed tnt)) return;
-
-        // Always allow TNT explosions
         event.setCancelled(false);
 
-        // If WorldGuard cleared the block list, force the explosion manually
         if (event.blockList().isEmpty()) {
             Location center = tnt.getLocation();
             Scheduler.runAtLocation(plugin, center, () -> {
-                // Create a real explosion that breaks blocks
                 center.getWorld().createExplosion(center, 4f, false, true);
             });
         }
     }
-
-    // === WATER/LAVA TRACKING ===
 
     @EventHandler
     public void onBucket(PlayerBucketEmptyEvent event) {
