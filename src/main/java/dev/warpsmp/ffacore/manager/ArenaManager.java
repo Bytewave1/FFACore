@@ -281,28 +281,29 @@ public class ArenaManager {
         List<LocationKey> toReset = new ArrayList<>(placedBlocks);
         plugin.getLogger().info("Arena reset " + arena.name + ": resetting " + toReset.size() + " placed blocks");
 
+        int restored = 0;
         for (LocationKey key : toReset) {
+            if (!key.world.equals(arena.world.getName())) continue;
             String coordKey = key.x + "," + key.y + "," + key.z;
             String originalData = snapshot.getOrDefault(coordKey, "minecraft:air");
-            Location loc = new Location(arena.world, key.x, key.y, key.z);
-
-            Scheduler.runAtLocation(plugin, loc, () -> {
+            try {
+                Block block = arena.world.getBlockAt(key.x, key.y, key.z);
+                block.setBlockData(Bukkit.createBlockData(originalData));
+                restored++;
+            } catch (Exception e) {
                 try {
-                    Block block = loc.getBlock();
-                    block.setBlockData(Bukkit.createBlockData(originalData));
-                } catch (Exception e) {
-                    // If data doesn't match, just set to air
-                    loc.getBlock().setType(Material.AIR);
-                }
-            });
+                    arena.world.getBlockAt(key.x, key.y, key.z).setType(Material.AIR);
+                    restored++;
+                } catch (Exception ignored) {}
+            }
         }
 
         // Clear tracked blocks and save
         placedBlocks.clear();
         savePlacedBlocks();
 
-        plugin.getLogger().info("Arena reset " + arena.name + ": done! " + toReset.size() + " blocks restored.");
-        return toReset.size();
+        plugin.getLogger().info("Arena reset " + arena.name + ": done! " + restored + " blocks restored.");
+        return restored;
     }
 
     private void startResetTask() {
@@ -310,8 +311,9 @@ public class ArenaManager {
             while (plugin.isEnabled()) {
                 try {
                     Thread.sleep(plugin.getConfig().getLong("arena-reset-interval", 300) * 1000L);
-                    if (!arenas.isEmpty()) {
-                        resetAllArenas();
+                    if (!plugin.isEnabled()) break;
+                    if (!arenas.isEmpty() && !placedBlocks.isEmpty()) {
+                        Scheduler.runGlobal(plugin, () -> resetAllArenas());
                     }
                 } catch (InterruptedException e) {
                     break;
