@@ -187,26 +187,27 @@ public class ShopManager {
         Integer amount = amountSlotMap.get(slot);
         if (amount == null) return;
 
-        purchaseItem(player, item, amount, false);
-        pendingMultiBuy.remove(player.getUniqueId());
-        openCrystalsMenu(player);
+        if (purchaseItem(player, item, amount, false)) {
+            pendingMultiBuy.remove(player.getUniqueId());
+            player.closeInventory();
+        }
     }
 
-    private void purchaseItem(Player player, ShopItem item, int amount, boolean closeAfter) {
+    private boolean purchaseItem(Player player, ShopItem item, int amount, boolean closeAfter) {
         int totalPrice = item.price * amount;
         CoinManager cm = plugin.getCoinManager();
 
         if (cm.getCoins(player.getUniqueId()) < totalPrice) {
             player.sendMessage(plugin.getMessageManager().get("coin-not-enough",
                 MessageManager.of("price", String.valueOf(totalPrice))));
-            return;
+            return false;
         }
 
         if ("effect".equals(item.type) && item.effectType != null) {
             if (player.hasPotionEffect(item.effectType)) {
                 player.sendMessage(plugin.getMessageManager().get("shop-active",
                     MessageManager.of("item", item.rawName)));
-                return;
+                return false;
             }
         }
 
@@ -227,6 +228,7 @@ public class ShopManager {
             MessageManager.of("item", (amount > 1 ? amount + "x " : "") + item.rawName, "price", String.valueOf(totalPrice))));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f);
         if (closeAfter) player.closeInventory();
+        return true;
     }
 
     // ====== HELPERS ======
