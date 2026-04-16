@@ -195,8 +195,11 @@ public class ArenaManager {
     public void trackBlock(Location loc) {
         if (isInAnyArena(loc)) {
             placedBlocks.add(new LocationKey(loc));
-            savePlacedBlocks();
         }
+    }
+
+    public void saveTrackedBlocks() {
+        savePlacedBlocks();
     }
 
     private void savePlacedBlocks() {
@@ -312,6 +315,8 @@ public class ArenaManager {
                 try {
                     Thread.sleep(plugin.getConfig().getLong("arena-reset-interval", 300) * 1000L);
                     if (!plugin.isEnabled()) break;
+                    // Save tracked blocks periodically
+                    savePlacedBlocks();
                     if (!arenas.isEmpty() && !placedBlocks.isEmpty()) {
                         Scheduler.runGlobal(plugin, () -> resetAllArenas());
                     }

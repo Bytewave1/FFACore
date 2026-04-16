@@ -52,15 +52,16 @@ public class BlockProtectListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onBreak(BlockBreakEvent event) {
-        if (event.getPlayer().hasPermission("ffacore.arena.bypass")) return;
-
         if (ALWAYS_PROTECTED.contains(event.getBlock().getType())) {
-            event.setCancelled(true);
+            if (!event.getPlayer().hasPermission("ffacore.arena.bypass")) {
+                event.setCancelled(true);
+                return;
+            }
         } else {
             event.setCancelled(false);
-            // Track broken blocks for arena reset
-            plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
         }
+        // ALWAYS track broken blocks for arena reset, even for OPs
+        plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)

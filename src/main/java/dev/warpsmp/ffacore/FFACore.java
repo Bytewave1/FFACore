@@ -95,6 +95,7 @@ public class FFACore extends JavaPlugin {
     public void onDisable() {
         if (coinManager != null) coinManager.save();
         if (statsManager != null) statsManager.save();
+        if (arenaManager != null) arenaManager.saveTrackedBlocks();
         getLogger().info("FFACore disabled!");
     }
 
