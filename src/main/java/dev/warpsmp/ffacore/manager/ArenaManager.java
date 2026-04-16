@@ -229,59 +229,71 @@ public class ArenaManager {
             return 0;
         }
 
-        // Load entire snapshot
-        Map<String, String> snapshot = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                int eq = line.indexOf('=');
-                if (eq < 0) continue;
-                snapshot.put(line.substring(0, eq), line.substring(eq + 1));
-            }
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed to load snapshot: " + e.getMessage());
-            return 0;
-        }
+        // Load snapshot async, then restore in batches on region thread
+        plugin.getLogger().info("Arena reset " + arena.name + ": loading snapshot...");
 
-        // Compare EVERY block in arena with snapshot, collect differences
-        List<Map.Entry<Location, String>> toRestore = new ArrayList<>();
-
-        for (Map.Entry<String, String> entry : snapshot.entrySet()) {
-            String[] parts = entry.getKey().split(",");
-            if (parts.length != 3) continue;
-            int x = Integer.parseInt(parts[0]);
-            int y = Integer.parseInt(parts[1]);
-            int z = Integer.parseInt(parts[2]);
-            toRestore.add(Map.entry(new Location(arena.world, x, y, z), entry.getValue()));
-        }
-
-        // Batch restore: 100 blocks per tick
-        int batchSize = 100;
-        int totalBatches = (toRestore.size() / batchSize) + 1;
-
-        for (int i = 0; i < toRestore.size(); i += batchSize) {
-            int start = i;
-            int end = Math.min(i + batchSize, toRestore.size());
-            long delay = (i / batchSize) + 1L;
-
-            Location batchLoc = toRestore.get(start).getKey();
-
-            Scheduler.runAtLocationDelayed(plugin, batchLoc, () -> {
-                for (int j = start; j < end; j++) {
-                    Location loc = toRestore.get(j).getKey();
-                    String originalData = toRestore.get(j).getValue();
-                    try {
-                        Block block = loc.getBlock();
-                        if (!block.getBlockData().getAsString().equals(originalData)) {
-                            block.setBlockData(Bukkit.createBlockData(originalData));
-                        }
-                    } catch (Exception ignored) {}
+        Thread resetThread = new Thread(() -> {
+            // Load snapshot
+            List<String[]> entries = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    int eq = line.indexOf('=');
+                    if (eq < 0) continue;
+                    entries.add(new String[]{line.substring(0, eq), line.substring(eq + 1)});
                 }
-            }, delay);
-        }
+            } catch (IOException e) {
+                plugin.getLogger().warning("Failed to load snapshot: " + e.getMessage());
+                return;
+            }
 
-        plugin.getLogger().info("Arena reset " + arena.name + ": checking " + toRestore.size() + " blocks in " + totalBatches + " batches");
-        return toRestore.size();
+            plugin.getLogger().info("Arena reset " + arena.name + ": " + entries.size() + " blocks loaded, restoring...");
+
+            // Process in small batches with sleep between to avoid lag
+            int batchSize = 200;
+            int restored = 0;
+
+            for (int i = 0; i < entries.size(); i += batchSize) {
+                int start = i;
+                int end = Math.min(i + batchSize, entries.size());
+
+                // Get first location for region scheduler
+                String[] firstParts = entries.get(start)[0].split(",");
+                Location batchLoc = new Location(arena.world,
+                    Integer.parseInt(firstParts[0]),
+                    Integer.parseInt(firstParts[1]),
+                    Integer.parseInt(firstParts[2]));
+
+                List<String[]> batch = entries.subList(start, end);
+
+                Scheduler.runAtLocation(plugin, batchLoc, () -> {
+                    for (String[] entry : batch) {
+                        try {
+                            String[] parts = entry[0].split(",");
+                            int x = Integer.parseInt(parts[0]);
+                            int y = Integer.parseInt(parts[1]);
+                            int z = Integer.parseInt(parts[2]);
+                            Block block = arena.world.getBlockAt(x, y, z);
+                            String originalData = entry[1];
+                            if (!block.getBlockData().getAsString().equals(originalData)) {
+                                block.setBlockData(Bukkit.createBlockData(originalData));
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                });
+
+                restored += (end - start);
+
+                // Sleep 50ms between batches to spread load
+                try { Thread.sleep(50); } catch (InterruptedException e) { break; }
+            }
+
+            plugin.getLogger().info("Arena reset " + arena.name + ": done! " + restored + " blocks checked.");
+        }, "FFACore-ArenaReset-" + arena.name);
+        resetThread.setDaemon(true);
+        resetThread.start();
+
+        return 1; // returns immediately, reset happens async
     }
 
     private void startResetTask() {

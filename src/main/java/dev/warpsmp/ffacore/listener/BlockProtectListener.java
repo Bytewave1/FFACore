@@ -41,12 +41,23 @@ public class BlockProtectListener implements Listener {
         this.plugin = plugin;
     }
 
+    // Force allow ALL block breaking, then re-cancel only sandstone
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onBreakForceAllow(BlockBreakEvent event) {
+        // Override spawn-protection and any other vanilla blocking
+        if (!ALWAYS_PROTECTED.contains(event.getBlock().getType())) {
+            event.setCancelled(false);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onBreak(BlockBreakEvent event) {
         if (event.getPlayer().hasPermission("ffacore.arena.bypass")) return;
 
         if (ALWAYS_PROTECTED.contains(event.getBlock().getType())) {
             event.setCancelled(true);
+        } else {
+            event.setCancelled(false);
         }
     }
 
