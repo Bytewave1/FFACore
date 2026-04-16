@@ -2,6 +2,7 @@ package dev.warpsmp.ffacore.listener;
 
 import dev.warpsmp.ffacore.FFACore;
 import dev.warpsmp.ffacore.manager.ShopManager;
+import dev.warpsmp.ffacore.util.Scheduler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -49,6 +50,13 @@ public class ShopClickListener implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
-        plugin.getShopManager().removePlayer(player.getUniqueId());
+        // Delay cleanup by 2 ticks — if we're switching menus, the new menu will
+        // re-set the openMenus entry before this cleanup runs
+        Scheduler.runPlayerDelayed(plugin, player, () -> {
+            // Only remove if player doesn't have a menu open anymore
+            if (player.getOpenInventory().getTopInventory().getSize() <= 4) {
+                plugin.getShopManager().removePlayer(player.getUniqueId());
+            }
+        }, 2L);
     }
 }

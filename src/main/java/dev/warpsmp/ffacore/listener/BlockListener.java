@@ -65,40 +65,21 @@ public class BlockListener implements Listener {
         plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
     }
 
-    // === TNT EXPLOSIONS — if WorldGuard cancels, redo explosion manually ===
+    // === TNT EXPLOSIONS — use world.createExplosion to bypass WorldGuard ===
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onExplodeLowest(EntityExplodeEvent event) {
-        if (event.getEntity() instanceof TNTPrimed) {
-            event.setCancelled(false);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-    public void onExplodeMonitor(EntityExplodeEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onExplode(EntityExplodeEvent event) {
         if (!(event.getEntity() instanceof TNTPrimed tnt)) return;
 
-        if (event.isCancelled()) {
-            // WorldGuard blocked it — manually break blocks in radius
-            event.setCancelled(false);
-            Location center = tnt.getLocation();
-            float yield = event.getYield();
-            int radius = 4;
+        // Always allow TNT explosions
+        event.setCancelled(false);
 
+        // If WorldGuard cleared the block list, force the explosion manually
+        if (event.blockList().isEmpty()) {
+            Location center = tnt.getLocation();
             Scheduler.runAtLocation(plugin, center, () -> {
-                for (int x = -radius; x <= radius; x++) {
-                    for (int y = -radius; y <= radius; y++) {
-                        for (int z = -radius; z <= radius; z++) {
-                            if (x * x + y * y + z * z > radius * radius) continue;
-                            Block b = center.getWorld().getBlockAt(
-                                center.getBlockX() + x, center.getBlockY() + y, center.getBlockZ() + z);
-                            if (b.getType() != Material.AIR && b.getType() != Material.BEDROCK
-                                && b.getType().getHardness() >= 0) {
-                                b.breakNaturally();
-                            }
-                        }
-                    }
-                }
+                // Create a real explosion that breaks blocks
+                center.getWorld().createExplosion(center, 4f, false, true);
             });
         }
     }
