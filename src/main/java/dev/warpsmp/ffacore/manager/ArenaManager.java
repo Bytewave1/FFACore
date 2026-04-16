@@ -266,7 +266,9 @@ public class ArenaManager {
 
                 List<String[]> batch = entries.subList(start, end);
 
+                final int batchNum = i / batchSize;
                 Scheduler.runAtLocation(plugin, batchLoc, () -> {
+                    int changed = 0;
                     for (String[] entry : batch) {
                         try {
                             String[] parts = entry[0].split(",");
@@ -275,10 +277,17 @@ public class ArenaManager {
                             int z = Integer.parseInt(parts[2]);
                             Block block = arena.world.getBlockAt(x, y, z);
                             String originalData = entry[1];
-                            if (!block.getBlockData().getAsString().equals(originalData)) {
+                            String currentData = block.getBlockData().getAsString();
+                            if (!currentData.equals(originalData)) {
                                 block.setBlockData(Bukkit.createBlockData(originalData));
+                                changed++;
                             }
-                        } catch (Exception ignored) {}
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Reset error: " + e.getMessage());
+                        }
+                    }
+                    if (changed > 0 || batchNum % 500 == 0) {
+                        plugin.getLogger().info("Batch #" + batchNum + ": " + changed + " blocks changed");
                     }
                 });
 
