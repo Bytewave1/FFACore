@@ -48,10 +48,16 @@ public class BlockListener implements Listener {
         }
     }
 
-    // Force TNT explosions
+    // Force TNT explosions + track destroyed blocks for arena reset
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onExplode(EntityExplodeEvent event) {
         if (!(event.getEntity() instanceof TNTPrimed tnt)) return;
+
+        // Track blocks destroyed by explosion
+        for (Block b : event.blockList()) {
+            plugin.getArenaManager().trackBlock(b.getLocation());
+        }
+
         event.setCancelled(false);
 
         if (event.blockList().isEmpty()) {

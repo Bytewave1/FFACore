@@ -54,6 +54,7 @@ public class ArenaManager {
         }
         plugin.getLogger().info("Loaded " + arenas.size() + " arenas");
         loadSnapshotCaches();
+        loadPlacedBlocks();
     }
 
     private void loadSnapshotCaches() {
@@ -194,7 +195,35 @@ public class ArenaManager {
     public void trackBlock(Location loc) {
         if (isInAnyArena(loc)) {
             placedBlocks.add(new LocationKey(loc));
+            savePlacedBlocks();
         }
+    }
+
+    private void savePlacedBlocks() {
+        File pbFile = new File(plugin.getDataFolder(), "placed-blocks.dat");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(pbFile))) {
+            for (LocationKey key : placedBlocks) {
+                writer.write(key.world + "," + key.x + "," + key.y + "," + key.z);
+                writer.newLine();
+            }
+        } catch (IOException ignored) {}
+    }
+
+    private void loadPlacedBlocks() {
+        File pbFile = new File(plugin.getDataFolder(), "placed-blocks.dat");
+        if (!pbFile.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(pbFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length != 4) continue;
+                placedBlocks.add(new LocationKey(parts[0],
+                    Integer.parseInt(parts[1]),
+                    Integer.parseInt(parts[2]),
+                    Integer.parseInt(parts[3])));
+            }
+        } catch (Exception ignored) {}
+        plugin.getLogger().info("Loaded " + placedBlocks.size() + " tracked placed blocks");
     }
 
     /**
@@ -229,80 +258,51 @@ public class ArenaManager {
             return 0;
         }
 
-        // Load snapshot async, then restore in batches on region thread
-        plugin.getLogger().info("Arena reset " + arena.name + ": loading snapshot...");
+        if (placedBlocks.isEmpty()) {
+            plugin.getLogger().info("Arena reset " + arena.name + ": no placed blocks to reset.");
+            return 0;
+        }
 
-        Thread resetThread = new Thread(() -> {
-            // Load snapshot
-            List<String[]> entries = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    int eq = line.indexOf('=');
-                    if (eq < 0) continue;
-                    entries.add(new String[]{line.substring(0, eq), line.substring(eq + 1)});
+        // Load snapshot
+        Map<String, String> snapshot = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int eq = line.indexOf('=');
+                if (eq < 0) continue;
+                snapshot.put(line.substring(0, eq), line.substring(eq + 1));
+            }
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to load snapshot: " + e.getMessage());
+            return 0;
+        }
+
+        // Only reset tracked blocks
+        List<LocationKey> toReset = new ArrayList<>(placedBlocks);
+        plugin.getLogger().info("Arena reset " + arena.name + ": resetting " + toReset.size() + " placed blocks");
+
+        for (LocationKey key : toReset) {
+            String coordKey = key.x + "," + key.y + "," + key.z;
+            String originalData = snapshot.getOrDefault(coordKey, "minecraft:air");
+            Location loc = new Location(arena.world, key.x, key.y, key.z);
+
+            Scheduler.runAtLocation(plugin, loc, () -> {
+                try {
+                    Block block = loc.getBlock();
+                    block.setBlockData(Bukkit.createBlockData(originalData));
+                } catch (Exception e) {
+                    // If data doesn't match, just set to air
+                    loc.getBlock().setType(Material.AIR);
                 }
-            } catch (IOException e) {
-                plugin.getLogger().warning("Failed to load snapshot: " + e.getMessage());
-                return;
-            }
+            });
+        }
 
-            plugin.getLogger().info("Arena reset " + arena.name + ": " + entries.size() + " blocks loaded, restoring...");
+        // Clear tracked blocks and save
+        placedBlocks.clear();
+        savePlacedBlocks();
 
-            // Process in small batches with sleep between to avoid lag
-            int batchSize = 200;
-            int restored = 0;
-
-            for (int i = 0; i < entries.size(); i += batchSize) {
-                int start = i;
-                int end = Math.min(i + batchSize, entries.size());
-
-                // Get first location for region scheduler
-                String[] firstParts = entries.get(start)[0].split(",");
-                Location batchLoc = new Location(arena.world,
-                    Integer.parseInt(firstParts[0]),
-                    Integer.parseInt(firstParts[1]),
-                    Integer.parseInt(firstParts[2]));
-
-                List<String[]> batch = entries.subList(start, end);
-
-                final int batchNum = i / batchSize;
-                Scheduler.runAtLocation(plugin, batchLoc, () -> {
-                    int changed = 0;
-                    for (String[] entry : batch) {
-                        try {
-                            String[] parts = entry[0].split(",");
-                            int x = Integer.parseInt(parts[0]);
-                            int y = Integer.parseInt(parts[1]);
-                            int z = Integer.parseInt(parts[2]);
-                            Block block = arena.world.getBlockAt(x, y, z);
-                            String originalData = entry[1];
-                            String currentData = block.getBlockData().getAsString();
-                            if (!currentData.equals(originalData)) {
-                                block.setBlockData(Bukkit.createBlockData(originalData));
-                                changed++;
-                            }
-                        } catch (Exception e) {
-                            plugin.getLogger().warning("Reset error: " + e.getMessage());
-                        }
-                    }
-                    if (changed > 0 || batchNum % 500 == 0) {
-                        plugin.getLogger().info("Batch #" + batchNum + ": " + changed + " blocks changed");
-                    }
-                });
-
-                restored += (end - start);
-
-                // Sleep 50ms between batches to spread load
-                try { Thread.sleep(50); } catch (InterruptedException e) { break; }
-            }
-
-            plugin.getLogger().info("Arena reset " + arena.name + ": done! " + restored + " blocks checked.");
-        }, "FFACore-ArenaReset-" + arena.name);
-        resetThread.setDaemon(true);
-        resetThread.start();
-
-        return 1; // returns immediately, reset happens async
+        plugin.getLogger().info("Arena reset " + arena.name + ": done! " + toReset.size() + " blocks restored.");
+        return toReset.size();
     }
 
     private void startResetTask() {
@@ -354,6 +354,13 @@ public class ArenaManager {
             this.x = loc.getBlockX();
             this.y = loc.getBlockY();
             this.z = loc.getBlockZ();
+        }
+
+        public LocationKey(String world, int x, int y, int z) {
+            this.world = world;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
 
         @Override

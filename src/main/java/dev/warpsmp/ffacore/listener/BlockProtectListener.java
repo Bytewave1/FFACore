@@ -58,6 +58,8 @@ public class BlockProtectListener implements Listener {
             event.setCancelled(true);
         } else {
             event.setCancelled(false);
+            // Track broken blocks for arena reset
+            plugin.getArenaManager().trackBlock(event.getBlock().getLocation());
         }
     }
 
