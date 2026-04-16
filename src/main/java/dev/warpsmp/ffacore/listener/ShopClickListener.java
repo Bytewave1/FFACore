@@ -2,7 +2,6 @@ package dev.warpsmp.ffacore.listener;
 
 import dev.warpsmp.ffacore.FFACore;
 import dev.warpsmp.ffacore.manager.ShopManager;
-import dev.warpsmp.ffacore.util.Scheduler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,18 +24,23 @@ public class ShopClickListener implements Listener {
         String menuId = plugin.getShopManager().getMenuId(player.getUniqueId());
         if (menuId == null) return;
 
-        event.setCancelled(true);
+        // Only cancel clicks in the shop inventory, not player's own inventory
+        if (event.getClickedInventory() == event.getView().getTopInventory()) {
+            event.setCancelled(true);
+            int slot = event.getRawSlot();
+            plugin.getLogger().info("[SHOP DEBUG] Click: menuId=" + menuId + " slot=" + slot);
 
-        if (event.getClickedInventory() != event.getView().getTopInventory()) return;
-
-        int slot = event.getRawSlot();
-        plugin.getLogger().info("[SHOP DEBUG] Click: menuId=" + menuId + " slot=" + slot);
-
-        switch (menuId) {
-            case ShopManager.MAIN_ID -> plugin.getShopManager().handleMainClick(player, slot);
-            case ShopManager.EFFECTS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.EFFECTS_ID);
-            case ShopManager.CRYSTALS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.CRYSTALS_ID);
-            case ShopManager.AMOUNT_ID -> plugin.getShopManager().handleAmountClick(player, slot);
+            switch (menuId) {
+                case ShopManager.MAIN_ID -> plugin.getShopManager().handleMainClick(player, slot);
+                case ShopManager.EFFECTS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.EFFECTS_ID);
+                case ShopManager.CRYSTALS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.CRYSTALS_ID);
+                case ShopManager.AMOUNT_ID -> plugin.getShopManager().handleAmountClick(player, slot);
+            }
+        } else {
+            // Block shift-clicking items into shop
+            if (event.isShiftClick()) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -44,20 +48,30 @@ public class ShopClickListener implements Listener {
     public void onDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (plugin.getShopManager().getMenuId(player.getUniqueId()) != null) {
-            event.setCancelled(true);
+            // Only cancel if dragging into top inventory
+            for (int slot : event.getRawSlots()) {
+                if (slot < event.getView().getTopInventory().getSize()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
         }
     }
 
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
-        // Delay cleanup by 2 ticks — if we're switching menus, the new menu will
-        // re-set the openMenus entry before this cleanup runs
-        Scheduler.runPlayerDelayed(plugin, player, () -> {
-            // Only remove if player doesn't have a menu open anymore
-            if (player.getOpenInventory().getTopInventory().getSize() <= 4) {
+        // Only clean up if not switching to another shop menu
+        // Check after 3 ticks if player still has a shop menu open
+        final String currentMenu = plugin.getShopManager().getMenuId(player.getUniqueId());
+        if (currentMenu == null) return;
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            String newMenu = plugin.getShopManager().getMenuId(player.getUniqueId());
+            // If menu is still the same (not switched), player actually closed it
+            if (newMenu != null && newMenu.equals(currentMenu)) {
                 plugin.getShopManager().removePlayer(player.getUniqueId());
             }
-        }, 2L);
+        }, 3L);
     }
 }
