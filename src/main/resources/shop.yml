@@ -141,6 +141,22 @@ fighting-menu:
       items:
         - "OBSIDIAN:1"
       multi-buy: true
+    shield:
+      slot: 12
+      material: SHIELD
+      name: "<gradient:#ffffff:#aaaaaa><bold>sʜɪᴇʟᴅ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase a Shield</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 100
+      type: items
+      items:
+        - "SHIELD:1"
+      multi-buy: false
     windcharge:
       slot: 16
       material: WIND_CHARGE
