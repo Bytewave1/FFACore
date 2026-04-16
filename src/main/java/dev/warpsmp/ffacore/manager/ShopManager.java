@@ -168,8 +168,13 @@ public class ShopManager {
     private final Map<Integer, Integer> amountSlotMap = new HashMap<>();
 
     public void handleAmountClick(Player player, int slot) {
+        plugin.getLogger().info("[SHOP DEBUG] handleAmountClick slot=" + slot + " player=" + player.getName());
+        plugin.getLogger().info("[SHOP DEBUG] pendingMultiBuy=" + (pendingMultiBuy.containsKey(player.getUniqueId())));
+        plugin.getLogger().info("[SHOP DEBUG] amountSlotMap=" + amountSlotMap);
+
         ShopItem item = pendingMultiBuy.get(player.getUniqueId());
         if (item == null) {
+            plugin.getLogger().info("[SHOP DEBUG] No pending item, going to main menu");
             openMainMenu(player);
             return;
         }
@@ -185,6 +190,7 @@ public class ShopManager {
         }
 
         Integer amount = amountSlotMap.get(slot);
+        plugin.getLogger().info("[SHOP DEBUG] amount for slot " + slot + " = " + amount);
         if (amount == null) return;
 
         if (purchaseItem(player, item, amount, false)) {

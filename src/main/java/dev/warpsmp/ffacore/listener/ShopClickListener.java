@@ -30,6 +30,7 @@ public class ShopClickListener implements Listener {
         if (event.getClickedInventory() != event.getView().getTopInventory()) return;
 
         int slot = event.getRawSlot();
+        plugin.getLogger().info("[SHOP DEBUG] Click: menuId=" + menuId + " slot=" + slot);
 
         switch (menuId) {
             case ShopManager.MAIN_ID -> plugin.getShopManager().handleMainClick(player, slot);
