@@ -215,13 +215,12 @@ public class ArenaManager {
 
     private int resetArena(Arena arena) {
         File snapFile = new File(snapshotsDir, arena.name.toLowerCase() + ".dat");
-        if (!snapFile.exists()) return 0;
+        if (!snapFile.exists()) {
+            plugin.getLogger().warning("No snapshot for arena " + arena.name);
+            return 0;
+        }
 
-        // Only reset tracked (player-placed) blocks, not the entire snapshot
-        Set<LocationKey> toReset = new HashSet<>(placedBlocks);
-        if (toReset.isEmpty()) return 0;
-
-        // Load only the entries we need from snapshot
+        // Load entire snapshot
         Map<String, String> snapshot = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(snapFile))) {
             String line;
@@ -235,47 +234,45 @@ public class ArenaManager {
             return 0;
         }
 
-        // Batch restore: 50 blocks per tick to avoid lag
-        List<Runnable> tasks = new ArrayList<>();
-        for (LocationKey key : toReset) {
-            String coordKey = key.x + "," + key.y + "," + key.z;
-            String originalData = snapshot.get(coordKey);
-            // If not in snapshot, it was air originally
-            if (originalData == null) originalData = "minecraft:air";
+        // Compare EVERY block in arena with snapshot, collect differences
+        List<Map.Entry<Location, String>> toRestore = new ArrayList<>();
 
-            String finalData = originalData;
-            Location loc = new Location(arena.world, key.x, key.y, key.z);
-            tasks.add(() -> {
-                Block block = loc.getBlock();
-                if (!block.getBlockData().getAsString().equals(finalData)) {
-                    try {
-                        block.setBlockData(Bukkit.createBlockData(finalData));
-                    } catch (Exception ignored) {}
-                }
-            });
+        for (Map.Entry<String, String> entry : snapshot.entrySet()) {
+            String[] parts = entry.getKey().split(",");
+            if (parts.length != 3) continue;
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+            int z = Integer.parseInt(parts[2]);
+            toRestore.add(Map.entry(new Location(arena.world, x, y, z), entry.getValue()));
         }
 
-        // Schedule in batches of 50
-        int batchSize = 50;
-        for (int i = 0; i < tasks.size(); i += batchSize) {
+        // Batch restore: 100 blocks per tick
+        int batchSize = 100;
+        int totalBatches = (toRestore.size() / batchSize) + 1;
+
+        for (int i = 0; i < toRestore.size(); i += batchSize) {
             int start = i;
-            int end = Math.min(i + batchSize, tasks.size());
+            int end = Math.min(i + batchSize, toRestore.size());
             long delay = (i / batchSize) + 1L;
 
-            // Pick first location for region scheduler
-            LocationKey firstKey = toReset.iterator().next();
-            Location batchLoc = new Location(arena.world, firstKey.x, firstKey.y, firstKey.z);
+            Location batchLoc = toRestore.get(start).getKey();
 
             Scheduler.runAtLocationDelayed(plugin, batchLoc, () -> {
                 for (int j = start; j < end; j++) {
-                    tasks.get(j).run();
+                    Location loc = toRestore.get(j).getKey();
+                    String originalData = toRestore.get(j).getValue();
+                    try {
+                        Block block = loc.getBlock();
+                        if (!block.getBlockData().getAsString().equals(originalData)) {
+                            block.setBlockData(Bukkit.createBlockData(originalData));
+                        }
+                    } catch (Exception ignored) {}
                 }
             }, delay);
         }
 
-        int count = tasks.size();
-        plugin.getLogger().info("Arena reset: restoring " + count + " blocks in " + ((count / batchSize) + 1) + " batches");
-        return count;
+        plugin.getLogger().info("Arena reset " + arena.name + ": checking " + toRestore.size() + " blocks in " + totalBatches + " batches");
+        return toRestore.size();
     }
 
     private void startResetTask() {
