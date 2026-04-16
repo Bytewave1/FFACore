@@ -83,9 +83,10 @@ public class ShopManager {
         if (sec == null) return;
         int size = sec.getInt("size", 27);
         String title = sec.getString("title", "Select Amount");
-        Inventory inv = Bukkit.createInventory(null, size, mm.deserialize(title + "<!--" + AMOUNT_ID + "-->"));
+        Inventory inv = Bukkit.createInventory(null, size, mm.deserialize(title));
         fillEmpty(inv, size);
 
+        amountSlotMap.clear();
         List<Integer> amounts = sec.getIntegerList("amounts");
         int coins = plugin.getCoinManager().getCoins(player.getUniqueId());
         int startSlot = 10;
@@ -111,6 +112,7 @@ public class ShopManager {
             meta.lore(lore);
             display.setItemMeta(meta);
             inv.setItem(startSlot, display);
+            amountSlotMap.put(startSlot, amount);
             startSlot++;
         }
 
@@ -162,6 +164,9 @@ public class ShopManager {
         }
     }
 
+    // Stores slot -> amount mapping for the amount menu
+    private final Map<Integer, Integer> amountSlotMap = new HashMap<>();
+
     public void handleAmountClick(Player player, int slot) {
         ShopItem item = pendingMultiBuy.get(player.getUniqueId());
         if (item == null) {
@@ -179,13 +184,11 @@ public class ShopManager {
             return;
         }
 
-        List<Integer> amounts = sec != null ? sec.getIntegerList("amounts") : List.of();
-        int index = slot - 10;
-        if (index < 0 || index >= amounts.size()) return;
-        int amount = amounts.get(index);
+        Integer amount = amountSlotMap.get(slot);
+        if (amount == null) return;
+
         purchaseItem(player, item, amount, false);
         pendingMultiBuy.remove(player.getUniqueId());
-        // Go back to crystals after purchase
         openCrystalsMenu(player);
     }
 
