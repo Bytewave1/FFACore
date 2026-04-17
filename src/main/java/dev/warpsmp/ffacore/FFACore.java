@@ -84,6 +84,7 @@ public class FFACore extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockListener(this), this);
         getServer().getPluginManager().registerEvents(new WandListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockProtectListener(this), this);
+        getServer().getPluginManager().registerEvents(new ShulkerListener(this), this);
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new CoinsExpansion(this).register();

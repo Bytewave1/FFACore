@@ -163,7 +163,9 @@ fighting-menu:
       name: "<gradient:#aa55ff:#ff55ff><bold>sʜᴜʟᴋᴇʀ ʙᴏx</bold></gradient>"
       lore:
         - ""
-        - "<gray>Purchase an empty Shulker Box</gray>"
+        - "<gray>Portable storage box!</gray>"
+        - "<gray>Hold & <white>Shift + Right Click</white> to open</gray>"
+        - "<gray>without placing it down.</gray>"
         - ""
         - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
         - ""
