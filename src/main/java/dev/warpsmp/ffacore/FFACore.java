@@ -19,6 +19,7 @@ public class FFACore extends JavaPlugin {
     private EventManager eventManager;
     private KillstreakManager killstreakManager;
     private StatsManager statsManager;
+    private AfkZoneManager afkZoneManager;
     private TntZoneManager tntZoneManager;
 
     @Override
@@ -40,6 +41,7 @@ public class FFACore extends JavaPlugin {
         killstreakManager = new KillstreakManager(this);
         statsManager = new StatsManager(this);
         tntZoneManager = new TntZoneManager(this);
+        afkZoneManager = new AfkZoneManager(this);
 
         AdminSaveKitCommand adminKitCmd = new AdminSaveKitCommand(this);
         getCommand("adminsavekit").setExecutor(adminKitCmd);
@@ -70,6 +72,9 @@ public class FFACore extends JavaPlugin {
         TntCommand tntCmd = new TntCommand(this);
         getCommand("tnt").setExecutor(tntCmd);
         getCommand("tnt").setTabCompleter(tntCmd);
+        AfkZoneCommand afkCmd = new AfkZoneCommand(this);
+        getCommand("afkzone").setExecutor(afkCmd);
+        getCommand("afkzone").setTabCompleter(afkCmd);
         getCommand("ffareload").setExecutor(new ReloadCommand(this));
 
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
@@ -111,4 +116,5 @@ public class FFACore extends JavaPlugin {
     public KillstreakManager getKillstreakManager() { return killstreakManager; }
     public StatsManager getStatsManager() { return statsManager; }
     public TntZoneManager getTntZoneManager() { return tntZoneManager; }
+    public AfkZoneManager getAfkZoneManager() { return afkZoneManager; }
 }

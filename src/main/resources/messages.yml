@@ -54,5 +54,9 @@ spawn-already-warming: "{prefix}<red>Already teleporting...</red>"
 # General
 no-permission: "{prefix}<red>ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ</red>"
 player-only: "{prefix}<red>Only players can use this.</red>"
+
+# AFK Zone
+afk-earning: "<gradient:#55ff55:#55ffaa><bold>ᴀғᴋ</bold></gradient> <gray>{time}</gray> <dark_gray>|</dark_gray> <green>+{amount} ᴄᴏɪɴs</green> <gray>in {next}s</gray> <dark_gray>|</dark_gray> <green>{earned} ᴇᴀʀɴᴇᴅ</green>"
+afk-leave: "{prefix}<gray>You left the AFK zone.</gray> <green>ᴇᴀʀɴᴇᴅ {earned} ᴄᴏɪɴs</green>"
 player-not-found: "{prefix}<red>Player not found.</red>"
 usage-setcoins: "{prefix}<gray>Usage: /setcoins <player> <amount></gray>"

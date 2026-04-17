@@ -24,6 +24,9 @@ kit-cooldown: 600
 # Discord invite link
 discord-link: "https://discord.gg/7xrrbvH4nA"
 
+# AFK coins per minute
+afk-coins-per-minute: 20
+
 # Spawn protection radius (no damage, no combat tag within this radius of spawn)
 spawn-protection-radius: 5.0
 

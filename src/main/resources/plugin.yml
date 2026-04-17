@@ -47,6 +47,9 @@ commands:
   tnt:
     description: TNT zone management
     permission: ffacore.admin
+  afkzone:
+    description: AFK zone management
+    permission: ffacore.admin
   ffareload:
     description: Reload FFACore config
     permission: ffacore.admin
