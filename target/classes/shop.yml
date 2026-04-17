@@ -168,7 +168,7 @@ fighting-menu:
         - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
         - ""
         - "<yellow>Click to purchase!</yellow>"
-      price: 500
+      price: 1000
       type: items
       items:
         - "SHULKER_BOX:1"
