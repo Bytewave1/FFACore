@@ -173,6 +173,38 @@ fighting-menu:
       items:
         - "SHULKER_BOX:1"
       multi-buy: false
+    xpbottle:
+      slot: 14
+      material: EXPERIENCE_BOTTLE
+      name: "<gradient:#55ff55:#aaffaa><bold>xᴘ ʙᴏᴛᴛʟᴇ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase XP Bottles</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green> each</dark_gray>"
+        - ""
+        - "<yellow>Click to select amount!</yellow>"
+      price: 25
+      type: items
+      items:
+        - "EXPERIENCE_BOTTLE:1"
+      multi-buy: true
+    enderpearl:
+      slot: 11
+      material: ENDER_PEARL
+      name: "<gradient:#55aaff:#aa55ff><bold>ᴇɴᴅᴇʀᴘᴇᴀʀʟ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase Ender Pearls</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green> each</dark_gray>"
+        - ""
+        - "<yellow>Click to select amount!</yellow>"
+      price: 20
+      type: items
+      items:
+        - "ENDER_PEARL:1"
+      multi-buy: true
     windcharge:
       slot: 16
       material: WIND_CHARGE
