@@ -66,6 +66,58 @@ public class CoinsExpansion extends PlaceholderExpansion {
             return String.valueOf(plugin.getStatsManager().getRank(player.getUniqueId()));
         }
 
+        // Top 10 leaderboards: top_kills_1_name, top_kills_1_value, etc.
+        if (params.startsWith("top_")) {
+            return handleTopPlaceholder(params);
+        }
+
+        return null;
+    }
+
+    private String handleTopPlaceholder(String params) {
+        String[] parts = params.split("_");
+        if (parts.length != 4) return null;
+
+        String type = parts[1];
+        int pos;
+        try {
+            pos = Integer.parseInt(parts[2]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        String field = parts[3];
+        if (pos < 1 || pos > 10) return null;
+
+        switch (type) {
+            case "kills" -> {
+                var top = plugin.getStatsManager().getTopKills(pos);
+                if (top.size() < pos) return field.equals("name") ? "---" : "0";
+                var entry = top.get(pos - 1);
+                return field.equals("name") ? entry.getValue().name : String.valueOf(entry.getValue().kills);
+            }
+            case "deaths" -> {
+                var top = plugin.getStatsManager().getTopDeaths(pos);
+                if (top.size() < pos) return field.equals("name") ? "---" : "0";
+                var entry = top.get(pos - 1);
+                return field.equals("name") ? entry.getValue().name : String.valueOf(entry.getValue().deaths);
+            }
+            case "streak" -> {
+                var top = plugin.getStatsManager().getTopStreaks(pos);
+                if (top.size() < pos) return field.equals("name") ? "---" : "0";
+                var entry = top.get(pos - 1);
+                return field.equals("name") ? entry.getValue().name : String.valueOf(entry.getValue().highestStreak);
+            }
+            case "coins" -> {
+                var top = plugin.getCoinManager().getTopCoins(pos);
+                if (top.size() < pos) return field.equals("name") ? "---" : "0";
+                var entry = top.get(pos - 1);
+                if (field.equals("name")) {
+                    var stats = plugin.getStatsManager().getStats(entry.getKey());
+                    return stats.name;
+                }
+                return String.valueOf(entry.getValue());
+            }
+        }
         return null;
     }
 }

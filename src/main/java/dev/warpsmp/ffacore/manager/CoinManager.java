@@ -5,8 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CoinManager {
@@ -40,6 +39,12 @@ public class CoinManager {
 
     public void addCoins(UUID uuid, int amount) {
         coins.put(uuid, getCoins(uuid) + amount);
+    }
+
+    public List<Map.Entry<UUID, Integer>> getTopCoins(int limit) {
+        List<Map.Entry<UUID, Integer>> sorted = new java.util.ArrayList<>(coins.entrySet());
+        sorted.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+        return sorted.subList(0, Math.min(limit, sorted.size()));
     }
 
     public boolean removeCoins(UUID uuid, int amount) {

@@ -84,6 +84,18 @@ public class StatsManager {
         return sorted.subList(0, Math.min(limit, sorted.size()));
     }
 
+    public List<Map.Entry<UUID, PlayerStats>> getTopDeaths(int limit) {
+        List<Map.Entry<UUID, PlayerStats>> sorted = new ArrayList<>(stats.entrySet());
+        sorted.sort((a, b) -> Integer.compare(b.getValue().deaths, a.getValue().deaths));
+        return sorted.subList(0, Math.min(limit, sorted.size()));
+    }
+
+    public List<Map.Entry<UUID, PlayerStats>> getTopStreaks(int limit) {
+        List<Map.Entry<UUID, PlayerStats>> sorted = new ArrayList<>(stats.entrySet());
+        sorted.sort((a, b) -> Integer.compare(b.getValue().highestStreak, a.getValue().highestStreak));
+        return sorted.subList(0, Math.min(limit, sorted.size()));
+    }
+
     public int getRank(UUID uuid) {
         List<Map.Entry<UUID, PlayerStats>> sorted = new ArrayList<>(stats.entrySet());
         sorted.sort((a, b) -> Integer.compare(b.getValue().kills, a.getValue().kills));
