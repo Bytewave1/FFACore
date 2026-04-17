@@ -31,6 +31,9 @@ public class EventCommand implements CommandExecutor, TabCompleter {
 
         switch (args[0].toLowerCase()) {
             case "doublecoins" -> {
+                if (plugin.getEventManager().isDoubleCoins()) {
+                    plugin.getEventManager().stopDoubleCoins();
+                }
                 int minutes = 10;
                 if (args.length >= 2) {
                     try {
