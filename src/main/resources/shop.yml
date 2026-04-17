@@ -26,14 +26,16 @@ main-menu:
         - "<gray>Wind Charges & more!</gray>"
         - ""
         - "<yellow>Click to browse!</yellow>"
-    coming-soon:
+    enchantments:
       slot: 15
-      material: BARRIER
-      name: "<dark_gray><bold>ᴄᴏᴍɪɴɢ sᴏᴏɴ</bold></dark_gray>"
+      material: ENCHANTING_TABLE
+      name: "<gradient:#ffaa00:#ffdd00><bold>ᴇɴᴄʜᴀɴᴛᴍᴇɴᴛs</bold></gradient>"
       lore:
         - ""
-        - "<dark_gray>More items coming soon...</dark_gray>"
+        - "<gray>Purchase powerful</gray>"
+        - "<gray>enchantment books!</gray>"
         - ""
+        - "<yellow>Click to browse!</yellow>"
 
 # Effects category
 effects-menu:
@@ -223,6 +225,28 @@ fighting-menu:
       items:
         - "WIND_CHARGE:1"
       multi-buy: true
+
+# Enchantments category
+enchantments-menu:
+  title: "<gradient:#ffaa00:#ffdd00><bold>ᴇɴᴄʜᴀɴᴛᴍᴇɴᴛs</bold></gradient>"
+  size: 27
+  items:
+    mending:
+      slot: 13
+      material: ENCHANTED_BOOK
+      name: "<gradient:#ffaa00:#ffdd00><bold>ᴍᴇɴᴅɪɴɢ</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>An enchanted book with</gray>"
+        - "<gold>Mending</gold>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 500
+      type: enchanted-book
+      enchantment: MENDING
+      level: 1
 
 # Amount selection menu for multi-buy items
 amount-menu:

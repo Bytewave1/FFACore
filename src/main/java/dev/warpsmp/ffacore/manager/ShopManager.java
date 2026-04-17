@@ -28,6 +28,7 @@ public class ShopManager {
     public static final String MAIN_ID = "ffashop:main";
     public static final String EFFECTS_ID = "ffashop:effects";
     public static final String CRYSTALS_ID = "ffashop:fighting";
+    public static final String ENCHANTS_ID = "ffashop:enchantments";
     public static final String AMOUNT_ID = "ffashop:amount";
 
     // Per-player state
@@ -75,6 +76,17 @@ public class ShopManager {
         addBackButton(inv, sec.getInt("size", 27));
         player.openInventory(inv);
         openMenus.put(player.getUniqueId(), CRYSTALS_ID);
+    }
+
+    public void openEnchantmentsMenu(Player player) {
+        ConfigurationSection sec = config.getConfigurationSection("enchantments-menu");
+        if (sec == null) return;
+        Inventory inv = createMenu(sec, ENCHANTS_ID);
+        fillEmpty(inv, sec.getInt("size", 27));
+        addShopItems(inv, sec, player);
+        addBackButton(inv, sec.getInt("size", 27));
+        player.openInventory(inv);
+        openMenus.put(player.getUniqueId(), ENCHANTS_ID);
     }
 
     public void openAmountMenu(Player player, ShopItem item) {
@@ -141,13 +153,16 @@ public class ShopManager {
             switch (key) {
                 case "effects" -> openEffectsMenu(player);
                 case "fighting" -> openFightingMenu(player);
-                // coming-soon does nothing
+                case "enchantments" -> openEnchantmentsMenu(player);
             }
         }
     }
 
     public void handleCategoryClick(Player player, int slot, String menuId) {
-        String menuKey = EFFECTS_ID.equals(menuId) ? "effects-menu" : "fighting-menu";
+        String menuKey;
+        if (EFFECTS_ID.equals(menuId)) menuKey = "effects-menu";
+        else if (ENCHANTS_ID.equals(menuId)) menuKey = "enchantments-menu";
+        else menuKey = "fighting-menu";
         ShopItem item = getShopItemAt(menuKey, slot);
         if (item == null) {
             // Check back button
@@ -228,6 +243,12 @@ public class ShopManager {
                 clone.setAmount(give.getAmount() * amount);
                 player.getInventory().addItem(clone);
             }
+        } else if ("enchanted-book".equals(item.type) && item.enchantment != null) {
+            ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+            org.bukkit.inventory.meta.EnchantmentStorageMeta bookMeta = (org.bukkit.inventory.meta.EnchantmentStorageMeta) book.getItemMeta();
+            bookMeta.addStoredEnchant(item.enchantment, item.enchantLevel, true);
+            book.setItemMeta(bookMeta);
+            player.getInventory().addItem(book);
         }
 
         player.sendMessage(plugin.getMessageManager().get("shop-purchased",
@@ -347,6 +368,10 @@ public class ShopManager {
                     int amount = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
                     if (m != null) item.giveItems.add(new ItemStack(m, amount));
                 }
+            } else if ("enchanted-book".equals(item.type)) {
+                String enchName = sec.getString("enchantment", "MENDING");
+                item.enchantment = org.bukkit.enchantments.Enchantment.getByName(enchName);
+                item.enchantLevel = sec.getInt("level", 1);
             }
             return item;
         }
@@ -369,5 +394,7 @@ public class ShopManager {
         public int duration;
         public List<ItemStack> giveItems;
         public boolean multiBuy;
+        public org.bukkit.enchantments.Enchantment enchantment;
+        public int enchantLevel;
     }
 }

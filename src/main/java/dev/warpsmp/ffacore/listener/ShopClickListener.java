@@ -34,6 +34,7 @@ public class ShopClickListener implements Listener {
                 case ShopManager.MAIN_ID -> plugin.getShopManager().handleMainClick(player, slot);
                 case ShopManager.EFFECTS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.EFFECTS_ID);
                 case ShopManager.CRYSTALS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.CRYSTALS_ID);
+                case ShopManager.ENCHANTS_ID -> plugin.getShopManager().handleCategoryClick(player, slot, ShopManager.ENCHANTS_ID);
                 case ShopManager.AMOUNT_ID -> plugin.getShopManager().handleAmountClick(player, slot);
             }
         } else {
