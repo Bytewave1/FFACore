@@ -157,6 +157,22 @@ fighting-menu:
       items:
         - "SHIELD:1"
       multi-buy: false
+    shulker:
+      slot: 15
+      material: SHULKER_BOX
+      name: "<gradient:#aa55ff:#ff55ff><bold>sʜᴜʟᴋᴇʀ ʙᴏx</bold></gradient>"
+      lore:
+        - ""
+        - "<gray>Purchase an empty Shulker Box</gray>"
+        - ""
+        - "<dark_gray>ᴘʀɪᴄᴇ: <green>{price} ᴄᴏɪɴs</green></dark_gray>"
+        - ""
+        - "<yellow>Click to purchase!</yellow>"
+      price: 500
+      type: items
+      items:
+        - "SHULKER_BOX:1"
+      multi-buy: false
     windcharge:
       slot: 16
       material: WIND_CHARGE
