@@ -23,8 +23,8 @@ import java.util.*;
 public class ShulkerListener implements Listener {
 
     private final FFACore plugin;
-    // Store the shulker item that was removed from inventory
     private final Map<UUID, ItemStack> storedShulker = new HashMap<>();
+    private final Map<UUID, Integer> storedSlot = new HashMap<>();
     private final Set<UUID> openShulkers = new HashSet<>();
 
     public ShulkerListener(FFACore plugin) {
@@ -49,8 +49,10 @@ public class ShulkerListener implements Listener {
 
         if (openShulkers.contains(player.getUniqueId())) return;
 
-        // Clone the shulker and remove from hand
+        // Clone the shulker, save slot, remove from hand
         ItemStack shulkerClone = held.clone();
+        int heldSlot = player.getInventory().getHeldItemSlot();
+        storedSlot.put(player.getUniqueId(), heldSlot);
         player.getInventory().setItemInMainHand(null);
 
         // Read contents
@@ -122,6 +124,7 @@ public class ShulkerListener implements Listener {
         if (!openShulkers.remove(player.getUniqueId())) return;
 
         ItemStack shulkerItem = storedShulker.remove(player.getUniqueId());
+        Integer slot = storedSlot.remove(player.getUniqueId());
         if (shulkerItem == null) return;
 
         // Save GUI contents into shulker
@@ -138,8 +141,16 @@ public class ShulkerListener implements Listener {
         meta.setBlockState(box);
         shulkerItem.setItemMeta(meta);
 
-        // Give shulker back to player
-        player.getInventory().addItem(shulkerItem);
+        // Give shulker back to original slot
+        if (slot != null && player.getInventory().getItem(slot) == null) {
+            player.getInventory().setItem(slot, shulkerItem);
+        } else {
+            // Original slot occupied, try addItem, if full drop at feet
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(shulkerItem);
+            for (ItemStack drop : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), drop);
+            }
+        }
         player.updateInventory();
     }
 
