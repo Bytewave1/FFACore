@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -24,7 +23,8 @@ import java.util.*;
 public class ShulkerListener implements Listener {
 
     private final FFACore plugin;
-    private final Map<UUID, ItemStack> openShulkerItem = new HashMap<>();
+    // Store the shulker item that was removed from inventory
+    private final Map<UUID, ItemStack> storedShulker = new HashMap<>();
     private final Set<UUID> openShulkers = new HashSet<>();
 
     public ShulkerListener(FFACore plugin) {
@@ -37,8 +37,8 @@ public class ShulkerListener implements Listener {
         if (!event.getPlayer().isSneaking()) return;
 
         Player player = event.getPlayer();
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (!isShulkerBox(item.getType())) return;
+        ItemStack held = player.getInventory().getItemInMainHand();
+        if (!isShulkerBox(held.getType())) return;
 
         event.setCancelled(true);
 
@@ -47,24 +47,27 @@ public class ShulkerListener implements Listener {
             return;
         }
 
-        // Read contents from shulker
-        BlockStateMeta meta = (BlockStateMeta) item.getItemMeta();
-        ShulkerBox shulker = (ShulkerBox) meta.getBlockState();
+        if (openShulkers.contains(player.getUniqueId())) return;
 
-        Inventory inv = Bukkit.createInventory(null, 27,
+        // Clone the shulker and remove from hand
+        ItemStack shulkerClone = held.clone();
+        player.getInventory().setItemInMainHand(null);
+
+        // Read contents
+        BlockStateMeta meta = (BlockStateMeta) shulkerClone.getItemMeta();
+        ShulkerBox box = (ShulkerBox) meta.getBlockState();
+
+        Inventory gui = Bukkit.createInventory(null, 27,
             MiniMessage.miniMessage().deserialize("<gradient:#aa55ff:#ff55ff><bold>sʜᴜʟᴋᴇʀ ʙᴏx</bold></gradient>"));
 
-        for (int i = 0; i < shulker.getInventory().getSize() && i < 27; i++) {
-            ItemStack content = shulker.getInventory().getItem(i);
-            if (content != null) {
-                inv.setItem(i, content.clone());
-            }
+        for (int i = 0; i < box.getInventory().getSize() && i < 27; i++) {
+            ItemStack item = box.getInventory().getItem(i);
+            if (item != null) gui.setItem(i, item.clone());
         }
 
-        // Store reference to the original item
-        openShulkerItem.put(player.getUniqueId(), item);
+        storedShulker.put(player.getUniqueId(), shulkerClone);
         openShulkers.add(player.getUniqueId());
-        player.openInventory(inv);
+        player.openInventory(gui);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -72,36 +75,26 @@ public class ShulkerListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!openShulkers.contains(player.getUniqueId())) return;
 
-        // Block ALL shulker boxes from entering the shulker inventory
+        boolean isTopInv = event.getRawSlot() < 27;
         ItemStack cursor = event.getCursor();
         ItemStack current = event.getCurrentItem();
-        boolean isTopInventory = event.getClickedInventory() == event.getView().getTopInventory();
 
-        // Block placing shulker into shulker (cursor has shulker, clicking top inv)
-        if (cursor != null && isShulkerBox(cursor.getType()) && isTopInventory) {
+        // Block shulker boxes going INTO the shulker GUI
+        if (isTopInv && cursor != null && isShulkerBox(cursor.getType())) {
             event.setCancelled(true);
             return;
         }
 
-        // Block shift-clicking shulker into shulker
-        if (event.isShiftClick() && current != null && isShulkerBox(current.getType()) && !isTopInventory) {
+        // Block shift-click shulker into GUI
+        if (event.isShiftClick() && !isTopInv && current != null && isShulkerBox(current.getType())) {
             event.setCancelled(true);
             return;
         }
 
-        // Block number key swapping shulker into top
-        if (event.getClick() == ClickType.NUMBER_KEY && isTopInventory) {
+        // Block hotbar swap with shulker
+        if (event.getHotbarButton() >= 0 && isTopInv) {
             ItemStack hotbar = player.getInventory().getItem(event.getHotbarButton());
             if (hotbar != null && isShulkerBox(hotbar.getType())) {
-                event.setCancelled(true);
-                return;
-            }
-        }
-
-        // Prevent moving the shulker box we're viewing
-        if (!isTopInventory && current != null && isShulkerBox(current.getType())) {
-            ItemStack originalShulker = openShulkerItem.get(player.getUniqueId());
-            if (originalShulker != null && current.isSimilar(originalShulker)) {
                 event.setCancelled(true);
                 return;
             }
@@ -113,7 +106,6 @@ public class ShulkerListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!openShulkers.contains(player.getUniqueId())) return;
 
-        // Block dragging shulker boxes into top inventory
         if (event.getOldCursor() != null && isShulkerBox(event.getOldCursor().getType())) {
             for (int slot : event.getRawSlots()) {
                 if (slot < 27) {
@@ -129,30 +121,29 @@ public class ShulkerListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) return;
         if (!openShulkers.remove(player.getUniqueId())) return;
 
-        ItemStack originalShulker = openShulkerItem.remove(player.getUniqueId());
-        if (originalShulker == null) return;
+        ItemStack shulkerItem = storedShulker.remove(player.getUniqueId());
+        if (shulkerItem == null) return;
 
-        // Build new contents array from the GUI
-        Inventory topInv = event.getInventory();
-        ItemStack[] newContents = new ItemStack[27];
-        for (int i = 0; i < 27 && i < topInv.getSize(); i++) {
-            ItemStack item = topInv.getItem(i);
-            newContents[i] = item != null ? item.clone() : null;
+        // Save GUI contents into shulker
+        BlockStateMeta meta = (BlockStateMeta) shulkerItem.getItemMeta();
+        ShulkerBox box = (ShulkerBox) meta.getBlockState();
+        box.getInventory().clear();
+
+        Inventory gui = event.getInventory();
+        for (int i = 0; i < 27; i++) {
+            ItemStack item = gui.getItem(i);
+            box.getInventory().setItem(i, item != null ? item.clone() : null);
         }
 
-        // Write contents to the shulker item
-        BlockStateMeta meta = (BlockStateMeta) originalShulker.getItemMeta();
-        ShulkerBox shulker = (ShulkerBox) meta.getBlockState();
-        shulker.getInventory().setContents(newContents);
-        meta.setBlockState(shulker);
-        originalShulker.setItemMeta(meta);
+        meta.setBlockState(box);
+        shulkerItem.setItemMeta(meta);
 
-        // Force update player inventory
+        // Give shulker back to player
+        player.getInventory().addItem(shulkerItem);
         player.updateInventory();
     }
 
     private boolean isShulkerBox(Material mat) {
-        if (mat == null) return false;
-        return mat.name().contains("SHULKER_BOX");
+        return mat != null && mat.name().contains("SHULKER_BOX");
     }
 }
