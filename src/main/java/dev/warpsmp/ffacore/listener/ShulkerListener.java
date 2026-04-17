@@ -124,26 +124,30 @@ public class ShulkerListener implements Listener {
         Integer slot = openShulkerSlot.remove(player.getUniqueId());
         if (slot == null) return;
 
-        // Save inventory contents back to shulker item
+        // Get the shulker item from the saved slot
         ItemStack shulkerItem = player.getInventory().getItem(slot);
         if (shulkerItem == null || !isShulkerBox(shulkerItem.getType())) return;
 
-        if (!(shulkerItem.getItemMeta() instanceof BlockStateMeta meta)) return;
-        if (!(meta.getBlockState() instanceof ShulkerBox shulker)) return;
+        // Create a fresh copy of the item to avoid reference issues
+        ItemStack newShulker = shulkerItem.clone();
+        BlockStateMeta meta = (BlockStateMeta) newShulker.getItemMeta();
+        ShulkerBox shulker = (ShulkerBox) meta.getBlockState();
 
-        // Save contents
-        Inventory topInv = event.getInventory();
+        // Clear and set contents from the GUI
         shulker.getInventory().clear();
+        Inventory topInv = event.getInventory();
         for (int i = 0; i < 27 && i < topInv.getSize(); i++) {
             ItemStack item = topInv.getItem(i);
-            if (item != null) {
-                shulker.getInventory().setItem(i, item.clone());
-            }
+            shulker.getInventory().setItem(i, item != null ? item.clone() : null);
         }
 
+        // Apply state back
         meta.setBlockState(shulker);
-        shulkerItem.setItemMeta(meta);
-        player.getInventory().setItem(slot, shulkerItem);
+        newShulker.setItemMeta(meta);
+
+        // Replace the item in the player's inventory
+        player.getInventory().setItem(slot, newShulker);
+        player.updateInventory();
     }
 
     private boolean isShulkerBox(Material mat) {
